@@ -1,10 +1,11 @@
 using System.Text.Json;
 
-namespace ServerVendor.Connect.Data;
-
-[Serializable]
-public struct RpcMessage
+namespace ServerVendor.Connect.Data
 {
-    public string MethodName { get; set; }
-    public JsonElement[] Parameters { get; set; }
+    [Serializable]
+    public class RpcMessage
+    {
+        public string MethodName { get; set; }
+        public JsonElement[] Parameters { get; set; }
+    }
 }

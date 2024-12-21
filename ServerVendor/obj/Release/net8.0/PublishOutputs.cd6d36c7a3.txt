@@ -1,0 +1,5 @@
+D:\Projects\ServerVendor\publish\Client\ServerVendor.exe
+D:\Projects\ServerVendor\publish\Client\ServerVendor.dll
+D:\Projects\ServerVendor\publish\Client\ServerVendor.deps.json
+D:\Projects\ServerVendor\publish\Client\ServerVendor.runtimeconfig.json
+D:\Projects\ServerVendor\publish\Client\ServerVendor.pdb
