@@ -3,6 +3,7 @@ using System.Dynamic;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text.Json;
+using ServerVendor;
 using ServerVendor.Connect.Data;
 using ServerVendor.Connect.RPCHelper.Attributes;
 
