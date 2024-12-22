@@ -1,14 +1,11 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using ServerVendor.Connect.RPC;
-using ServerVendor.Connect.RPCHelper.Attributes;
-
-namespace ServerVendor;
+using ServerVendor.Connect.RPC.Attributes;
 
 public static class Program
 {
     public static bool IsServer { get; private set; }
-    
+
     public static void Main(string[] args)
     {
         Console.WriteLine("Введите 1 для запуска сервера, 2 для клиента:");
@@ -38,12 +35,12 @@ public static class Program
         Console.WriteLine($"Клиент подключен: {clientSocket.RemoteEndPoint}");
 
         var handler = new RpcHandler();
+        
+        // Запуск прослушивания RPC вызовов
+        Task.Run(() => RpcHelper.ListenForRpcCalls(clientSocket, handler));
 
-        Console.WriteLine("Сервер готов к обработке RPC вызовов.");
-        _ = RpcHelper.ListenForRpcCalls(clientSocket, handler);
-
-        dynamic rpcProxy = new RpcProxy(clientSocket);
-        rpcProxy.ClientMethod("Привет от сервера!");
+        // Серверный метод для обработки
+        handler.ServerMethod("Привет от сервера!");
 
         Console.ReadLine();
     }
@@ -57,11 +54,11 @@ public static class Program
         clientSocket.Connect("127.0.0.1", 5055);
         Console.WriteLine($"Клиент подключен к серверу: {clientSocket.RemoteEndPoint}");
 
-        Console.WriteLine("Клиент готов к обработке RPC вызовов.");
-        _ = RpcHelper.ListenForRpcCalls(clientSocket, handler);
+        // Запуск прослушивания RPC вызовов
+        Task.Run(() => RpcHelper.ListenForRpcCalls(clientSocket, handler));
 
-        dynamic rpcProxy = new RpcProxy(clientSocket);
-        rpcProxy.ServerMethod("Привет от клиента 1!");
+        // Клиентский метод для обработки
+        handler.ClientMethod("Привет от клиента!");
 
         Console.ReadLine();
     }

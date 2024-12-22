@@ -2,16 +2,14 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text.Json;
 using ServerVendor.Connect.Data;
-using ServerVendor.Connect.RPCHelper.Attributes;
-
-namespace ServerVendor.Connect.RPC;
+using ServerVendor.Connect.RPC.Attributes;
 
 public static class RpcHelper
 {
     public static async Task ListenForRpcCalls(Socket socket, RpcHandler handler)
     {
         byte[] buffer = new byte[1024];
-
+        
         while (true)
         {
             Console.WriteLine("Waiting for RPC calls...");
@@ -20,12 +18,11 @@ public static class RpcHelper
 
             if (bytesRead <= 0)
                 continue;
-
+            
             RpcMessage? message = DeserializeMessage(buffer.Take(bytesRead).ToArray());
             ProcessRpcMessage(message, handler);
         }
     }
-
 
     private static RpcMessage? DeserializeMessage(byte[] data)
     {
@@ -35,6 +32,7 @@ public static class RpcHelper
     private static void ProcessRpcMessage(RpcMessage? message, object handler)
     {
         var method = GetRpcMethod(handler, message.MethodName);
+        if (method != null)
         {
             var parameters = ConvertParameters(message.Parameters, method.GetParameters());
             method.Invoke(handler, parameters);

@@ -1,7 +1,4 @@
-﻿using System;
-
-
-namespace ServerVendor.Connect.RPCHelper.Attributes;
+﻿namespace ServerVendor.Connect.RPC.Attributes;
 
 public class RPCAttributes
 {
