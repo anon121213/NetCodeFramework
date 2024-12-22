@@ -6,19 +6,21 @@ using ServerVendor.Connect.RPC.Attributes;
 
 public static class RpcHelper
 {
+    private static bool IsServer => Program.IsServer;
+
     public static async Task ListenForRpcCalls(Socket socket, RpcHandler handler)
     {
         byte[] buffer = new byte[1024];
-        
+
         while (true)
         {
             Console.WriteLine("Waiting for RPC calls...");
-        
+
             int bytesRead = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), SocketFlags.None);
 
             if (bytesRead <= 0)
                 continue;
-            
+
             RpcMessage? message = DeserializeMessage(buffer.Take(bytesRead).ToArray());
             ProcessRpcMessage(message, handler);
         }
@@ -29,29 +31,41 @@ public static class RpcHelper
         return JsonSerializer.Deserialize<RpcMessage>(data);
     }
 
-    private static void ProcessRpcMessage(RpcMessage? message, object handler)
+    private static void ProcessRpcMessage(RpcMessage? message, RpcHandler handler)
     {
         var method = GetRpcMethod(handler, message.MethodName);
         if (method != null)
         {
+            if (method.GetCustomAttribute<RPCAttributes.ServerRPC>() != null && !IsServer)
+            {
+                Console.WriteLine("ServerRPC method can only be executed on the server.");
+                return; 
+            }
+
+            if (method.GetCustomAttribute<RPCAttributes.ClientRPC>() != null && IsServer)
+            {
+                Console.WriteLine("ClientRPC method can only be executed on the client.");
+                return;
+            }
+
             var parameters = ConvertParameters(message.Parameters, method.GetParameters());
             method.Invoke(handler, parameters);
         }
     }
 
-    private static MethodInfo? GetRpcMethod(object handler, string methodName)
+    private static MethodInfo? GetRpcMethod(RpcHandler handler, string methodName)
     {
         var methods = handler.GetType().GetMethods();
         return methods.FirstOrDefault(method =>
             method.Name == methodName
-            && (method.GetCustomAttribute<RPCAttributes.ServerRPC>() != null 
+            && (method.GetCustomAttribute<RPCAttributes.ServerRPC>() != null
                 || method.GetCustomAttribute<RPCAttributes.ClientRPC>() != null));
     }
 
     private static object?[] ConvertParameters(JsonElement[] jsonElements, ParameterInfo[] parameterInfos)
     {
         var parameters = new object?[jsonElements.Length];
-        for (int i = 0; i < jsonElements.Length; i++) 
+        for (int i = 0; i < jsonElements.Length; i++)
             parameters[i] = JsonSerializer.Deserialize(jsonElements[i].GetRawText(), parameterInfos[i].ParameterType);
         return parameters;
     }

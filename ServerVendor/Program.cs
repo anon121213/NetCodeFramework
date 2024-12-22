@@ -36,11 +36,9 @@ public static class Program
 
         var handler = new RpcHandler();
         
-        // Запуск прослушивания RPC вызовов
         Task.Run(() => RpcHelper.ListenForRpcCalls(clientSocket, handler));
 
-        // Серверный метод для обработки
-        handler.ServerMethod("Привет от сервера!");
+        handler.ClientMethod("Привет от сервера!");
 
         Console.ReadLine();
     }
@@ -49,16 +47,12 @@ public static class Program
     {
         var clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-        var handler = new RpcHandler();
-
         clientSocket.Connect("127.0.0.1", 5055);
         Console.WriteLine($"Клиент подключен к серверу: {clientSocket.RemoteEndPoint}");
 
-        // Запуск прослушивания RPC вызовов
-        Task.Run(() => RpcHelper.ListenForRpcCalls(clientSocket, handler));
+        Task.Run(() => RpcHelper.ListenForRpcCalls(clientSocket, RpcHandler.Instance));
 
-        // Клиентский метод для обработки
-        handler.ClientMethod("Привет от клиента!");
+        RpcHandler.Instance.ServerMethod("Привет от клиента!");
 
         Console.ReadLine();
     }
@@ -66,6 +60,23 @@ public static class Program
 
 public class RpcHandler
 {
+    private static RpcHandler _instace;
+    
+    public static RpcHandler Instance
+    {
+        get
+        {
+            if (_instace == null)
+            {
+                _instace = new RpcHandler();
+                return _instace;
+            }
+
+            return _instace;
+        }
+    }
+
+
     [RPCAttributes.ServerRPC]
     public void ServerMethod(string message)
     {
