@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = ServerVendor
-build_property.ProjectDir = D:\Projects\ServerVendor\ServerVendor\
+build_property.ProjectDir = E:\Projects\ServerVendorRep\ServerVendor\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

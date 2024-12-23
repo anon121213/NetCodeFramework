@@ -1,5 +1,4 @@
-﻿using System;
-using System.Dynamic;
+﻿using System.Dynamic;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text.Json;
@@ -55,13 +54,18 @@ public class RpcProxy : DynamicObject
 
     private MethodInfo GetRpcMethod(string methodName)
     {
-        var methods = typeof(RpcHandler).GetMethods();
-        foreach (var method in methods)
+        var types = Assembly.GetExecutingAssembly().GetTypes();
+        foreach (var type in types)
         {
-            if (method.Name == methodName && 
-                (method.GetCustomAttribute<RPCAttributes.ServerRPC>() != null || method.GetCustomAttribute<RPCAttributes.ClientRPC>() != null))
+            var methods = type.GetMethods();
+            foreach (var method in methods)
             {
-                return method;
+                if (method.Name == methodName && 
+                    (method.GetCustomAttribute<RPCAttributes.ServerRPC>() != null 
+                     || method.GetCustomAttribute<RPCAttributes.ClientRPC>() != null))
+                {
+                    return method;
+                }
             }
         }
         return null;
