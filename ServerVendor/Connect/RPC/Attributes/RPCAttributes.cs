@@ -1,13 +1,10 @@
-﻿using System;
-
-
-namespace ServerVendor.Connect.RPCHelper.Attributes;
+﻿namespace ServerVendor.Connect.RPC.Attributes;
 
 public class RPCAttributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class ServerRPC : Attribute { }
+    public class ServerRPC : Attribute;
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class ClientRPC : Attribute { }
+    public class ClientRPC : Attribute;
 }

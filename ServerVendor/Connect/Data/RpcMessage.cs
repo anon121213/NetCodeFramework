@@ -7,5 +7,6 @@ namespace ServerVendor.Connect.Data
     {
         public string MethodName { get; set; }
         public JsonElement[] Parameters { get; set; }
+        public string ClassType { get; set; }
     }
 }
