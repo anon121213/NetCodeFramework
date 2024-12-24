@@ -42,3 +42,8 @@ E:\Projects\ServerVendorRep\ServerVendor\obj\Debug\net8.0\refint\ServerVendor.dl
 E:\Projects\ServerVendorRep\ServerVendor\obj\Debug\net8.0\ServerVendor.pdb
 E:\Projects\ServerVendorRep\ServerVendor\obj\Debug\net8.0\ServerVendor.genruntimeconfig.cache
 E:\Projects\ServerVendorRep\ServerVendor\obj\Debug\net8.0\ref\ServerVendor.dll
+E:\Projects\ServerVendorRep\servervendor\bin\Debug\net8.0\MessagePack.dll
+E:\Projects\ServerVendorRep\servervendor\bin\Debug\net8.0\MessagePack.Annotations.dll
+E:\Projects\ServerVendorRep\servervendor\bin\Debug\net8.0\Microsoft.NET.StringTools.dll
+E:\Projects\ServerVendorRep\servervendor\obj\Debug\net8.0\ServerVendor.csproj.AssemblyReference.cache
+E:\Projects\ServerVendorRep\servervendor\obj\Debug\net8.0\ServerVe.9E580CEE.Up2Date

@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "qTAxbLv1osw=",
+  "dgSpecHash": "4bP7Qa2VEdM=",
   "success": true,
-  "projectFilePath": "E:\\Projects\\ServerVendorRep\\ServerVendor\\ServerVendor.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "E:\\Projects\\ServerVendorRep\\servervendor\\ServerVendor.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\anon1.JASPERMAGLOT\\.nuget\\packages\\messagepack\\3.1.0\\messagepack.3.1.0.nupkg.sha512",
+    "C:\\Users\\anon1.JASPERMAGLOT\\.nuget\\packages\\messagepack.annotations\\3.1.0\\messagepack.annotations.3.1.0.nupkg.sha512",
+    "C:\\Users\\anon1.JASPERMAGLOT\\.nuget\\packages\\messagepackanalyzer\\3.1.0\\messagepackanalyzer.3.1.0.nupkg.sha512",
+    "C:\\Users\\anon1.JASPERMAGLOT\\.nuget\\packages\\microsoft.net.stringtools\\17.11.4\\microsoft.net.stringtools.17.11.4.nupkg.sha512"
+  ],
   "logs": []
 }

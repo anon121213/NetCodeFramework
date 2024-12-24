@@ -1,12 +1,13 @@
-using System.Text.Json;
+using MessagePack;
 
 namespace ServerVendor.Connect.Data
 {
+    [MessagePackObject]
     [Serializable]
     public class RpcMessage
     {
-        public string MethodName { get; set; }
-        public JsonElement[] Parameters { get; set; }
-        public string ClassType { get; set; }
+        [Key(0)] public string MethodName { get; set; }
+        [Key(1)] public byte[][] Parameters { get; set; }
+        [Key(2)] public string ClassType { get; set; }
     }
 }
