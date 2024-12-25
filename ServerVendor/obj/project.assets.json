@@ -144,11 +144,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Projects\\ServerVendorRep\\servervendor\\ServerVendor.csproj",
+      "projectUniqueName": "E:\\Projects\\ServerVendorRep\\ServerVendor\\ServerVendor.csproj",
       "projectName": "ServerVendor",
-      "projectPath": "E:\\Projects\\ServerVendorRep\\servervendor\\ServerVendor.csproj",
+      "projectPath": "E:\\Projects\\ServerVendorRep\\ServerVendor\\ServerVendor.csproj",
       "packagesPath": "C:\\Users\\anon1.JASPERMAGLOT\\.nuget\\packages\\",
-      "outputPath": "E:\\Projects\\ServerVendorRep\\servervendor\\obj\\",
+      "outputPath": "E:\\Projects\\ServerVendorRep\\ServerVendor\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\anon1.JASPERMAGLOT\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -171,11 +171,6 @@
         "warnAsError": [
           "NU1605"
         ]
-      },
-      "restoreAuditProperties": {
-        "enableAudit": "true",
-        "auditLevel": "low",
-        "auditMode": "direct"
       }
     },
     "frameworks": {

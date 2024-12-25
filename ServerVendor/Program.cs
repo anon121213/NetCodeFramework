@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using ServerVendor.Connect.Proxy;
-using ServerVendor.Connect.RPC;
 using ServerVendor.Connect.RPC.Attributes;
 
 namespace ServerVendor;
@@ -73,7 +71,7 @@ public static class Program
         
         var methodInfoClient = typeof(RpcHandler).GetMethod("ServerMethod");
         RpcProxy.TryInvokeRPC<RpcHandler>(methodInfoClient, "Привет от Клиента!");
-
+        
         Console.ReadLine();
     }
 }
