@@ -1,5 +1,0 @@
-D:\Projects\ServerVendor\publish\Release\ServerVendor.exe
-D:\Projects\ServerVendor\publish\Release\ServerVendor.dll
-D:\Projects\ServerVendor\publish\Release\ServerVendor.deps.json
-D:\Projects\ServerVendor\publish\Release\ServerVendor.runtimeconfig.json
-D:\Projects\ServerVendor\publish\Release\ServerVendor.pdb
