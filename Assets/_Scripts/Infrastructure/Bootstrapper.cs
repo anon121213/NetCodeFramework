@@ -63,8 +63,8 @@ namespace _Scripts.Infrastructure
             await _networkRunner.StartClient(clientData);
 
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToServer));
-            RPCInvoker.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromClient");
-            RPCInvoker.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromClient");
+            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromClient");
+            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromClient");
         }
 
         private async void SendServerEvents(int playerId)
@@ -72,8 +72,8 @@ namespace _Scripts.Infrastructure
             await UniTask.Delay(2000);
             
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToClient));
-            RPCInvoker.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromServer");
-            RPCInvoker.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromServer");
+            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromServer");
+            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromServer");
             
             _networkStringVariable.Value = 100;
         }

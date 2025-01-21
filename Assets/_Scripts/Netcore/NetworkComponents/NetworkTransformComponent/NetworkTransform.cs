@@ -68,7 +68,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkTransformComponent
 
         private void InvokePosition()
         {
-            RPCInvoker.TryInvokeBehaviourRPC<NetworkTransform>(this,
+            RPCInvoker.InvokeBehaviourRPC<NetworkTransform>(this,
                 _onPositionChangeMethod, ProtocolType.Udp, transform.position);
 
             _lastPosition = transform.position;
@@ -76,7 +76,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkTransformComponent
         
         private void InvokeRotation()
         {
-            RPCInvoker.TryInvokeBehaviourRPC<NetworkTransform>(this,
+            RPCInvoker.InvokeBehaviourRPC<NetworkTransform>(this,
                 _onRotationChangeMethod, ProtocolType.Udp, transform.rotation);
 
             _lastRotation = transform.rotation;
@@ -84,7 +84,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkTransformComponent
         
         private void InvokeScale()
         {
-            RPCInvoker.TryInvokeBehaviourRPC<NetworkTransform>(this,
+            RPCInvoker.InvokeBehaviourRPC<NetworkTransform>(this,
                 _onScaleChangeMethod, ProtocolType.Udp, transform.localScale);
 
             _lastScale = transform.localScale;

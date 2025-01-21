@@ -4,8 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using _Scripts.Netcore.Data.ConnectionData;
-using _Scripts.Netcore.FormatterSystem;
-using _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor;
+using _Scripts.Netcore.Initializer;
 using _Scripts.Netcore.Proxy;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -14,9 +13,8 @@ namespace _Scripts.Netcore.Runner
 {
     public class NetworkRunner : INetworkRunner, IDisposable
     {
-        private readonly INetworkFormatter _networkFormatter;
+        private readonly CancellationTokenSource _cts = new();
         private readonly IRpcListener _rpcListener;
-        public event Action<int> OnPlayerConnected;
 
         public Dictionary<int, Socket> ConnectedClients { get; } = new();
 
@@ -32,22 +30,13 @@ namespace _Scripts.Netcore.Runner
 
         public bool IsServer { get; private set; }
 
-        private readonly CancellationTokenSource _cts = new();
+        public event Action<int> OnPlayerConnected;
 
-        public NetworkRunner(INetworkFormatter networkFormatter,
-            IRpcListener rpcListener)
+        public NetworkRunner(IRpcListener rpcListener,
+            INetworkInitializer networkInitializer)
         {
-            _networkFormatter = networkFormatter;
             _rpcListener = rpcListener;
-            Initialize();
-        }
-
-        private void Initialize()
-        {
-            _networkFormatter.Initialize();
-            _rpcListener.Initialize();
-            RPCInvoker.Initialize(this, _rpcListener);
-            NetworkVariableProcessor.Instance.Initialize(this);
+            networkInitializer.Initialize(this);
         }
         
         public async UniTask StartServer(ConnectServerData connectServerData)
@@ -82,8 +71,11 @@ namespace _Scripts.Netcore.Runner
 
             Debug.Log($"Клиент подключен к серверу: {TcpServerSocket.RemoteEndPoint}");
 
-            UniTask.RunOnThreadPool(() => _rpcListener.ListenForTcpRpcCalls(TcpServerSocket, _cts.Token)).Forget();
-            UniTask.RunOnThreadPool(() => _rpcListener.ListenForUdpRpcCalls(UdpServerSocket, remoteEndPoint, _cts.Token)).Forget();
+            UniTask.RunOnThreadPool(() => _rpcListener.ListenForTcpRpcCalls(TcpServerSocket, _cts.Token))
+                .AttachExternalCancellation(_cts.Token);
+            
+            UniTask.RunOnThreadPool(() => _rpcListener.ListenForUdpRpcCalls(UdpServerSocket, remoteEndPoint, _cts.Token))
+                .AttachExternalCancellation(_cts.Token);
         }
 
         private async UniTaskVoid WaitConnectClients(IPEndPoint remoteEndPoint)
@@ -100,8 +92,11 @@ namespace _Scripts.Netcore.Runner
 
                 ConnectedClients.Add(playerIndex, clientSocketTCP);
 
-                UniTask.RunOnThreadPool(() => _rpcListener.ListenForTcpRpcCalls(clientSocketTCP, _cts.Token)).Forget();
-                UniTask.RunOnThreadPool(() => _rpcListener.ListenForUdpRpcCalls(UdpServerSocket, remoteEndPoint, _cts.Token)).Forget();
+                UniTask.RunOnThreadPool(() => _rpcListener.ListenForTcpRpcCalls(clientSocketTCP, _cts.Token))
+                    .AttachExternalCancellation(_cts.Token);
+                
+                UniTask.RunOnThreadPool(() => _rpcListener.ListenForUdpRpcCalls(UdpServerSocket, remoteEndPoint, _cts.Token))
+                    .AttachExternalCancellation(_cts.Token);
 
                 OnPlayerConnected?.Invoke(playerIndex);
                 Debug.Log($"Клиент подключен: {clientSocketTCP.RemoteEndPoint}");
@@ -118,7 +113,6 @@ namespace _Scripts.Netcore.Runner
         public void Dispose()
         {
             _cts.Dispose();
-            RPCInvoker.Dispose();
         }
     }
 }

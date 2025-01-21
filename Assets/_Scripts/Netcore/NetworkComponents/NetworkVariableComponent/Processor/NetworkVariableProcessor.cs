@@ -71,7 +71,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor
             };
 
             MethodInfo methodInfo = typeof(NetworkVariableProcessor).GetMethod(nameof(SyncVariableOnClients));
-            RPCInvoker.TryInvokeServiceRPC<NetworkVariableProcessor>(this, methodInfo, ProtocolType.Tcp, message);
+            RPCInvoker.InvokeServiceRPC<NetworkVariableProcessor>(this, methodInfo, ProtocolType.Tcp, message);
             
             return true;
         }
@@ -89,7 +89,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor
             method?.Invoke(variable, new[] { deserializedValue });
 
             var clientMethod = typeof(NetworkVariableProcessor).GetMethod(nameof(SyncVariableOnClients));
-            RPCInvoker.TryInvokeServiceRPC<NetworkVariableProcessor>(this, clientMethod, ProtocolType.Tcp, message);
+            RPCInvoker.InvokeServiceRPC<NetworkVariableProcessor>(this, clientMethod, ProtocolType.Tcp, message);
         }
 
         [ClientRPC]
