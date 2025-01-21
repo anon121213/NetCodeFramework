@@ -11,5 +11,6 @@ namespace _Scripts.Netcore.Data
         [Key(1)] public byte[][] Parameters { get; set; }
         [Key(2)] public string ClassType { get; set; }
         [Key(3)] public byte[] MethodParam { get; set; }
+        [Key(4)] public int InstanceId { get; set; }
     }
 }

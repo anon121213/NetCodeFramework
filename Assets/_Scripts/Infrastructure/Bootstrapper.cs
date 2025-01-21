@@ -12,7 +12,7 @@ using VContainer.Unity;
 
 namespace _Scripts.Infrastructure
 {
-    public class Bootstrapper : IInitializable, IRPCCaller
+    public class Bootstrapper : NetworkService, IInitializable 
     {
         private readonly INetworkRunner _networkRunner;
 
@@ -62,19 +62,19 @@ namespace _Scripts.Infrastructure
             await _networkRunner.StartClient(clientData);
 
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToServer));
-            RpcProxy.TryInvokeRPC<Bootstrapper>(methodInfo, ProtocolType.Tcp, "HelloFromClient");
-            RpcProxy.TryInvokeRPC<Bootstrapper>(methodInfo, ProtocolType.Udp, "HelloFromClient");
+            RpcProxy.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromClient");
+            RpcProxy.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromClient");
             
            
         }
 
         private async void SendServerEvents(int playerId)
         {
-            await UniTask.Delay(1000);
+            await UniTask.Delay(2000);
             
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToClient));
-            RpcProxy.TryInvokeRPC<Bootstrapper>(methodInfo, ProtocolType.Tcp, "HelloFromServer");
-            RpcProxy.TryInvokeRPC<Bootstrapper>(methodInfo, ProtocolType.Udp, "HelloFromServer");
+            RpcProxy.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromServer");
+            RpcProxy.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromServer");
             
             _networkStringVariable.Value = 100;
         }

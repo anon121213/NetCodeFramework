@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +18,8 @@ namespace _Scripts.Netcore.Proxy
 {
     public static class RpcProxy
     {
-        private static readonly Dictionary<Type, IRPCCaller> _callers = new();
-        private static INetworkRunner _runner;
+        private static readonly Dictionary<(Type, int), IRPCCaller> _callers = new();
 
-        // Очереди сообщений
         private static readonly ConcurrentQueue<byte[]> TcpSendQueue = new();
         private static readonly ConcurrentQueue<byte[]> UdpSendQueue = new();
 
@@ -28,22 +27,57 @@ namespace _Scripts.Netcore.Proxy
         private static readonly ConcurrentQueue<byte[]> UdpReceiveQueue = new();
 
         private static readonly CancellationTokenSource _cancellationTokenSource = new();
+        
+        private static INetworkRunner _runner;
 
         public static void Initialize(INetworkRunner runner)
         {
             _runner = (NetworkRunner)runner;
 
             ProcessTcpReceiveQueue(_cancellationTokenSource.Token).Forget();
+            ProcessTcpReceiveQueue(_cancellationTokenSource.Token).Forget();
+            ProcessTcpReceiveQueue(_cancellationTokenSource.Token).Forget();
+            ProcessTcpReceiveQueue(_cancellationTokenSource.Token).Forget();
+            ProcessTcpReceiveQueue(_cancellationTokenSource.Token).Forget();
+            
+            ProcessUdpReceiveQueue(_cancellationTokenSource.Token).Forget();
+            ProcessUdpReceiveQueue(_cancellationTokenSource.Token).Forget();
+            ProcessUdpReceiveQueue(_cancellationTokenSource.Token).Forget();
             ProcessUdpReceiveQueue(_cancellationTokenSource.Token).Forget();
             
             ProcessTcpSendQueue(_cancellationTokenSource.Token).Forget();
+            ProcessTcpSendQueue(_cancellationTokenSource.Token).Forget();
+            ProcessTcpSendQueue(_cancellationTokenSource.Token).Forget();
+            ProcessTcpSendQueue(_cancellationTokenSource.Token).Forget();
+            ProcessTcpSendQueue(_cancellationTokenSource.Token).Forget();
+            
+            ProcessUdpSendQueue(_cancellationTokenSource.Token).Forget();
+            ProcessUdpSendQueue(_cancellationTokenSource.Token).Forget();
+            ProcessUdpSendQueue(_cancellationTokenSource.Token).Forget();
             ProcessUdpSendQueue(_cancellationTokenSource.Token).Forget();
         }
 
-        public static void RegisterRPCInstance<T>(IRPCCaller caller) where T : IRPCCaller =>
-            _callers[typeof(T)] = caller;
+        public static void RegisterRPCInstance<T>(NetworkService caller) where T : IRPCCaller
+        {
+            caller.InitializeNetworkService();
+            _callers[(typeof(T), caller.InstanceId)] = caller;
+        }
 
-        public static bool TryInvokeRPC<TObject>(MethodInfo methodInfo, ProtocolType protocolType,
+        public static void RegisterRPCInstance<T>(NetworkBehaviour caller) where T : IRPCCaller
+        {
+            caller.InitializeNetworkBehaviour();
+            _callers[(typeof(T), caller.InstanceId)] = caller;
+        }
+
+        public static bool TryInvokeBehaviourRPC<TObject>(NetworkBehaviour networkBehaviour, MethodInfo methodInfo, 
+            ProtocolType protocolType, params object[] parameters) where TObject : NetworkBehaviour =>
+                InvokeRPC<TObject>(networkBehaviour.InstanceId, methodInfo, protocolType, parameters);
+
+        public static bool TryInvokeServiceRPC<TObject>(NetworkService networkService, MethodInfo methodInfo,
+            ProtocolType protocolType, params object[] parameters) where TObject : NetworkService =>
+                InvokeRPC<TObject>(networkService.InstanceId, methodInfo, protocolType, parameters);
+
+        private static bool InvokeRPC<TObject>(int instanceID, MethodInfo methodInfo, ProtocolType protocolType,
             params object[] parameters) where TObject : class
         {
             if (methodInfo.GetCustomAttribute<ClientRPC>() == null &&
@@ -53,7 +87,7 @@ namespace _Scripts.Netcore.Proxy
                 return false;
             }
 
-            if (!_callers.ContainsKey(typeof(TObject)))
+            if (!_callers.ContainsKey((typeof(TObject), instanceID)))
             {
                 Debug.LogError($"{typeof(TObject)} must be registered.");
                 return false;
@@ -68,7 +102,8 @@ namespace _Scripts.Netcore.Proxy
                 MethodName = methodInfo.Name,
                 Parameters = serializedParameters,
                 ClassType = typeof(TObject).ToString(),
-                MethodParam = serializedParamTypesBytes
+                MethodParam = serializedParamTypesBytes,
+                InstanceId = instanceID
             };
 
             byte[] data = SerializeMessage(message);
@@ -85,7 +120,7 @@ namespace _Scripts.Netcore.Proxy
 
             return true;
         }
-
+        
         private static void EnqueueMessage(ProtocolType protocolType, byte[] data)
         {
             switch (protocolType)
@@ -185,48 +220,77 @@ namespace _Scripts.Netcore.Proxy
             }
         }
 
-        public static async UniTaskVoid ListenForTcpRpcCalls(Socket socket)
+        public static async UniTaskVoid ListenForTcpRpcCalls(Socket socket, CancellationToken cancellationToken)
         {
-            byte[] buffer = new byte[1024 * 64];
-            while (true)
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(1024 * 64); 
+            try
             {
-                try
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    int bytesRead = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), SocketFlags.None);
-                    if (bytesRead > 0)
+                    try
                     {
-                        TcpReceiveQueue.Enqueue(buffer.Take(bytesRead).ToArray());
+                        var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), SocketFlags.None);
+
+                        if (result <= 0)
+                            continue;
+                        
+                        var receivedData = new byte[result];
+                        Array.Copy(buffer, receivedData, result);
+                        TcpReceiveQueue.Enqueue(receivedData);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogError($"TCP Receive Exception: {ex.Message}");
+                        await UniTask.Delay(60, cancellationToken: cancellationToken);
                     }
                 }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"TCP Receive Exception: {ex.Message}");
-                    await UniTask.Delay(1000);
-                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 
-        public static async UniTaskVoid ListenForUdpRpcCalls(Socket socket, IPEndPoint ipEndPoint)
+
+        public static async UniTaskVoid ListenForUdpRpcCalls(Socket socket, IPEndPoint ipEndPoint, CancellationToken cancellationToken)
         {
-            byte[] buffer = new byte[1024 * 128];
-            while (true)
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(1024 * 128); 
+            try
             {
-                try
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    var result =
-                        await socket.ReceiveFromAsync(new ArraySegment<byte>(buffer), SocketFlags.None, ipEndPoint);
-                    if (result.ReceivedBytes > 0)
+                    try
                     {
-                        UdpReceiveQueue.Enqueue(buffer.Take(result.ReceivedBytes).ToArray());
+                        var result = await socket.ReceiveFromAsync(new ArraySegment<byte>(buffer), SocketFlags.None, ipEndPoint);
+                        
+                        if (result.ReceivedBytes <= 0)
+                            continue;
+                        
+                        var receivedData = new byte[result.ReceivedBytes];
+                        Array.Copy(buffer, receivedData, result.ReceivedBytes);
+                        UdpReceiveQueue.Enqueue(receivedData);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogError($"UDP Receive Exception: {ex.Message}");
+                        await UniTask.Delay(60, cancellationToken: cancellationToken); 
                     }
                 }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"UDP Receive Exception: {ex.Message}");
-                    await UniTask.Delay(1000);
-                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
+
 
         private static async UniTaskVoid ProcessTcpReceiveQueue(CancellationToken cancellationToken)
         {
@@ -278,7 +342,7 @@ namespace _Scripts.Netcore.Proxy
 
             var parameters = ConvertParameters(message.Parameters, method.GetParameters());
 
-            if (!_callers.TryGetValue(callerType, out IRPCCaller rpcCaller))
+            if (!_callers.TryGetValue((callerType, message.InstanceId), out IRPCCaller rpcCaller))
                 return;
 
             method.Invoke(rpcCaller, parameters);
@@ -318,7 +382,32 @@ namespace _Scripts.Netcore.Proxy
             MessagePackSerializer.Deserialize<RpcMessage>(data);
     }
 
+
     public interface IRPCCaller
     {
+    }
+    
+    public abstract class NetworkService : IRPCCaller
+    {
+        private static int _instanceCounter;
+
+        public int InstanceId { get; private set; } // Только базовый класс может задавать.
+
+        public void InitializeNetworkService()
+        {
+            InstanceId = Interlocked.Increment(ref _instanceCounter);
+        }
+    }
+    
+    public abstract class NetworkBehaviour: MonoBehaviour, IRPCCaller
+    {
+        private static int _instanceCounter;
+
+        public int InstanceId { get; private set; } // Только базовый класс может задавать.
+
+        public void InitializeNetworkBehaviour()
+        {
+            InstanceId = Interlocked.Increment(ref _instanceCounter);
+        }
     }
 }
