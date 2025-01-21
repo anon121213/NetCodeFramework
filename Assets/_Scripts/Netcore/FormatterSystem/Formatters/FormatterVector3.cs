@@ -3,7 +3,7 @@ using MessagePack;
 using MessagePack.Formatters;
 using UnityEngine;
 
-namespace _Scripts.Netcore.Data.Formatters
+namespace _Scripts.Netcore.FormatterSystem.Formatters
 {
     public class Vector3Formatter : IMessagePackFormatter<Vector3>
     {

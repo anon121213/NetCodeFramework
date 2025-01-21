@@ -1,20 +1,18 @@
 ﻿using System;
+using MessagePack;
+using MessagePack.Formatters;
+using UnityEngine;
 
-namespace _Scripts.Netcore.Data.Formatters
+namespace _Scripts.Netcore.FormatterSystem.Formatters
 {
-    using MessagePack;
-    using MessagePack.Formatters;
-    using UnityEngine;
-
     public class QuaternionFormatter : IMessagePackFormatter<Quaternion>
     {
         public Quaternion Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
             var count = reader.ReadArrayHeader();
+            
             if (count != 4)
-            {
                 throw new InvalidOperationException("Invalid Quaternion format.");
-            }
 
             float x = reader.ReadSingle();
             float y = reader.ReadSingle();

@@ -1,6 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Reflection;
 using _Scripts.Netcore.Data.Attributes;
+using _Scripts.Netcore.NetworkComponents.RootComponents;
 using _Scripts.Netcore.Proxy;
 using _Scripts.Netcore.Runner;
 using UnityEngine;
@@ -42,7 +43,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkTransformComponent
             _lastRotation = transform.rotation;
             _lastScale = transform.localScale;
             
-            RpcProxy.RegisterRPCInstance<NetworkTransform>(this);
+            RPCInvoker.RegisterRPCInstance<NetworkTransform>(this);
         }
 
         private void InitServerPosition()
@@ -67,7 +68,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkTransformComponent
 
         private void InvokePosition()
         {
-            RpcProxy.TryInvokeBehaviourRPC<NetworkTransform>(this,
+            RPCInvoker.TryInvokeBehaviourRPC<NetworkTransform>(this,
                 _onPositionChangeMethod, ProtocolType.Udp, transform.position);
 
             _lastPosition = transform.position;
@@ -75,7 +76,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkTransformComponent
         
         private void InvokeRotation()
         {
-            RpcProxy.TryInvokeBehaviourRPC<NetworkTransform>(this,
+            RPCInvoker.TryInvokeBehaviourRPC<NetworkTransform>(this,
                 _onRotationChangeMethod, ProtocolType.Udp, transform.rotation);
 
             _lastRotation = transform.rotation;
@@ -83,7 +84,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkTransformComponent
         
         private void InvokeScale()
         {
-            RpcProxy.TryInvokeBehaviourRPC<NetworkTransform>(this,
+            RPCInvoker.TryInvokeBehaviourRPC<NetworkTransform>(this,
                 _onScaleChangeMethod, ProtocolType.Udp, transform.localScale);
 
             _lastScale = transform.localScale;

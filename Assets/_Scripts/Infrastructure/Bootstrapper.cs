@@ -4,6 +4,7 @@ using System.Reflection;
 using _Scripts.Netcore.Data.Attributes;
 using _Scripts.Netcore.Data.ConnectionData;
 using _Scripts.Netcore.NetworkComponents.NetworkVariableComponent;
+using _Scripts.Netcore.NetworkComponents.RootComponents;
 using _Scripts.Netcore.Proxy;
 using _Scripts.Netcore.Runner;
 using Cysharp.Threading.Tasks;
@@ -26,7 +27,7 @@ namespace _Scripts.Infrastructure
         
         public async void Initialize()
         {
-            RpcProxy.RegisterRPCInstance<Bootstrapper>(this);
+            RPCInvoker.RegisterRPCInstance<Bootstrapper>(this);
             
             _networkStringVariable.OnValueChanged += i => Debug.Log($"Value has been changed on: {i}");
 #if SERVER
@@ -62,10 +63,8 @@ namespace _Scripts.Infrastructure
             await _networkRunner.StartClient(clientData);
 
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToServer));
-            RpcProxy.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromClient");
-            RpcProxy.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromClient");
-            
-           
+            RPCInvoker.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromClient");
+            RPCInvoker.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromClient");
         }
 
         private async void SendServerEvents(int playerId)
@@ -73,8 +72,8 @@ namespace _Scripts.Infrastructure
             await UniTask.Delay(2000);
             
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToClient));
-            RpcProxy.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromServer");
-            RpcProxy.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromServer");
+            RPCInvoker.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromServer");
+            RPCInvoker.TryInvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromServer");
             
             _networkStringVariable.Value = 100;
         }

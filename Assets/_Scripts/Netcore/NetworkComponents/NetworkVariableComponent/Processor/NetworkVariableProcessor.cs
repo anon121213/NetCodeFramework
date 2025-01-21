@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using _Scripts.Netcore.Data.Attributes;
 using _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Data;
+using _Scripts.Netcore.NetworkComponents.RootComponents;
 using _Scripts.Netcore.Proxy;
 using _Scripts.Netcore.Runner;
 using MessagePack;
@@ -32,7 +33,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor
         public void Initialize(INetworkRunner networkRunner)
         {
             _networkRunner = networkRunner;
-            RpcProxy.RegisterRPCInstance<NetworkVariableProcessor>(this);
+            RPCInvoker.RegisterRPCInstance<NetworkVariableProcessor>(this);
         }
 
         public void RegisterNetworkVariable<T>(string name, NetworkVariable<T> networkVariable)
@@ -70,7 +71,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor
             };
 
             MethodInfo methodInfo = typeof(NetworkVariableProcessor).GetMethod(nameof(SyncVariableOnClients));
-            RpcProxy.TryInvokeServiceRPC<NetworkVariableProcessor>(this, methodInfo, ProtocolType.Tcp, message);
+            RPCInvoker.TryInvokeServiceRPC<NetworkVariableProcessor>(this, methodInfo, ProtocolType.Tcp, message);
             
             return true;
         }
@@ -88,7 +89,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor
             method?.Invoke(variable, new[] { deserializedValue });
 
             var clientMethod = typeof(NetworkVariableProcessor).GetMethod(nameof(SyncVariableOnClients));
-            RpcProxy.TryInvokeServiceRPC<NetworkVariableProcessor>(this, clientMethod, ProtocolType.Tcp, message);
+            RPCInvoker.TryInvokeServiceRPC<NetworkVariableProcessor>(this, clientMethod, ProtocolType.Tcp, message);
         }
 
         [ClientRPC]
