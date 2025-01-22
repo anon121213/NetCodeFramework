@@ -2,15 +2,17 @@
 using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
-using _Scripts.Netcore.Data;
 using _Scripts.Netcore.Data.Attributes;
-using _Scripts.Netcore.NetworkComponents.RootComponents;
-using _Scripts.Netcore.Proxy.Callers;
-using _Scripts.Netcore.Proxy.Processors;
+using _Scripts.Netcore.Data.Message;
+using _Scripts.Netcore.NetworkComponents.RPCComponents;
+using _Scripts.Netcore.RPCSystem.Callers;
+using _Scripts.Netcore.RPCSystem.DynamicProcessor;
+using _Scripts.Netcore.RPCSystem.Processors;
+using _Scripts.Netcore.RPCSystem.ProcessorsData;
 using MessagePack;
 using UnityEngine;
 
-namespace _Scripts.Netcore.Proxy
+namespace _Scripts.Netcore.RPCSystem
 {
     public class RPCInvoker
     {
@@ -37,14 +39,14 @@ namespace _Scripts.Netcore.Proxy
         }
         
         public static void InvokeBehaviourRPC<TObject>(NetworkBehaviour networkBehaviour, MethodInfo methodInfo,
-            ProtocolType protocolType, params object[] parameters) where TObject : NetworkBehaviour =>
-            InvokeRPC<TObject>(networkBehaviour.InstanceId, methodInfo, protocolType, parameters);
+            NetProtocolType protocolType, params object[] parameters) where TObject : NetworkBehaviour =>
+            InvokeRPC<TObject>(networkBehaviour.InstanceId, CallerTypes.Behaviour, methodInfo, protocolType, parameters);
 
         public static void InvokeServiceRPC<TObject>(NetworkService networkService, MethodInfo methodInfo,
-            ProtocolType protocolType, params object[] parameters) where TObject : NetworkService =>
-            InvokeRPC<TObject>(networkService.InstanceId, methodInfo, protocolType, parameters);
+            NetProtocolType protocolType, params object[] parameters) where TObject : NetworkService =>
+            InvokeRPC<TObject>(networkService.InstanceId, CallerTypes.Service, methodInfo, protocolType, parameters);
 
-        private static void InvokeRPC<TObject>(int instanceID, MethodInfo methodInfo, ProtocolType protocolType,
+        private static void InvokeRPC<TObject>(int instanceID, CallerTypes callerType, MethodInfo methodInfo, NetProtocolType protocolType,
             params object[] parameters) where TObject : class
         {
             if (methodInfo.GetCustomAttribute<ClientRPC>() == null &&
@@ -54,7 +56,8 @@ namespace _Scripts.Netcore.Proxy
                 return;
             }
 
-            if (!_callerService.Callers.ContainsKey((typeof(TObject), instanceID)))
+            if (!_callerService.CallerServices.ContainsKey((typeof(TObject), instanceID)) &&
+                !_callerService.CallerBehaviours.ContainsKey((typeof(TObject), instanceID)))
             {
                 Debug.LogError($"{typeof(TObject)} must be registered.");
                 return;
@@ -70,7 +73,8 @@ namespace _Scripts.Netcore.Proxy
                 Parameters = serializedParameters,
                 ClassType = typeof(TObject).ToString(),
                 MethodParam = serializedParamTypesBytes,
-                InstanceId = instanceID
+                InstanceId = instanceID,
+                CallerType = callerType
             };
 
             byte[] data = SerializeMessage(message);
@@ -85,18 +89,15 @@ namespace _Scripts.Netcore.Proxy
             }
         }
         
-        private static void EnqueueMessage(ProtocolType protocolType, byte[] data)
+        private static void EnqueueMessage(NetProtocolType protocolType, byte[] data)
         {
             switch (protocolType)
             {
-                case ProtocolType.Tcp:
+                case NetProtocolType.Tcp:
                     _sendProcessor.TcpSendQueue.Enqueue(data);
                     break;
-                case ProtocolType.Udp:
+                case NetProtocolType.Udp:
                     _sendProcessor.UdpSendQueue.Enqueue(data);
-                    break;
-                default:
-                    _sendProcessor.TcpSendQueue.Enqueue(data);
                     break;
             }
         }

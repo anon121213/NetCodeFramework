@@ -3,8 +3,10 @@ using System.Net.Sockets;
 using System.Reflection;
 using _Scripts.Netcore.Data.Attributes;
 using _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Data;
-using _Scripts.Netcore.NetworkComponents.RootComponents;
-using _Scripts.Netcore.Proxy;
+using _Scripts.Netcore.NetworkComponents.RPCComponents;
+using _Scripts.Netcore.RPCSystem;
+using _Scripts.Netcore.RPCSystem.DynamicProcessor;
+using _Scripts.Netcore.RPCSystem.ProcessorsData;
 using _Scripts.Netcore.Runner;
 using MessagePack;
 using UnityEngine;
@@ -13,8 +15,9 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor
 {
     public class NetworkVariableProcessor : NetworkService
     {
-        private INetworkRunner _networkRunner;
         private readonly Dictionary<string, object> _networkVariables = new();
+        
+        private INetworkRunner _networkRunner;
 
         private static NetworkVariableProcessor _instance;
 
@@ -71,7 +74,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor
             };
 
             MethodInfo methodInfo = typeof(NetworkVariableProcessor).GetMethod(nameof(SyncVariableOnClients));
-            RPCInvoker.InvokeServiceRPC<NetworkVariableProcessor>(this, methodInfo, ProtocolType.Tcp, message);
+            RPCInvoker.InvokeServiceRPC<NetworkVariableProcessor>(this, methodInfo, NetProtocolType.Tcp, message);
             
             return true;
         }
@@ -89,7 +92,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor
             method?.Invoke(variable, new[] { deserializedValue });
 
             var clientMethod = typeof(NetworkVariableProcessor).GetMethod(nameof(SyncVariableOnClients));
-            RPCInvoker.InvokeServiceRPC<NetworkVariableProcessor>(this, clientMethod, ProtocolType.Tcp, message);
+            RPCInvoker.InvokeServiceRPC<NetworkVariableProcessor>(this, clientMethod, NetProtocolType.Tcp, message);
         }
 
         [ClientRPC]

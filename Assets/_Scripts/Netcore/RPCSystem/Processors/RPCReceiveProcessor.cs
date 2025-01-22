@@ -3,19 +3,19 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using _Scripts.Netcore.Data;
-using _Scripts.Netcore.NetworkComponents.RootComponents;
-using _Scripts.Netcore.Proxy.Callers;
+using _Scripts.Netcore.Data.Message;
+using _Scripts.Netcore.NetworkComponents.RPCComponents;
+using _Scripts.Netcore.RPCSystem.Callers;
 using Cysharp.Threading.Tasks;
 using MessagePack;
 using UnityEngine;
 
-namespace _Scripts.Netcore.Proxy.Processors
+namespace _Scripts.Netcore.RPCSystem.Processors
 {
     public class RpcReceiveReceiveProcessor : IRpcReceiveProcessor
     {
         private readonly ICallerService _callerService;
-        
+
         public ConcurrentQueue<byte[]> TcpReceiveQueue { get; } = new();
         public ConcurrentQueue<byte[]> UdpReceiveQueue { get; } = new();
 
@@ -23,7 +23,7 @@ namespace _Scripts.Netcore.Proxy.Processors
         {
             _callerService = callerService;
         }
-        
+
         public async UniTask ProcessTcpReceiveQueue(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
@@ -74,12 +74,18 @@ namespace _Scripts.Netcore.Proxy.Processors
 
             var parameters = ConvertParameters(message.Parameters, method.GetParameters());
 
-            if (!_callerService.Callers.TryGetValue((callerType, message.InstanceId), out IRPCCaller rpcCaller))
-                return;
-
-            method.Invoke(rpcCaller, parameters);
+            if (message.CallerType == CallerTypes.Behaviour)
+            {
+                _callerService.CallerBehaviours.TryGetValue((callerType, message.InstanceId), out IRPCCaller rpcCaller);
+                method.Invoke(rpcCaller, parameters);
+            }
+            else
+            {
+                _callerService.CallerServices.TryGetValue((callerType, message.InstanceId), out IRPCCaller rpcCaller);
+                method.Invoke(rpcCaller, parameters);
+            }
         }
-        
+
         private static MethodInfo GetRpcMethod(Type callerType, RpcMessage message)
         {
             var paramTypes = MessagePackSerializer.Deserialize<Type[]>(message.MethodParam);

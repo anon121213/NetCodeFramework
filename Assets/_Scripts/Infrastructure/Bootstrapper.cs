@@ -4,8 +4,10 @@ using System.Reflection;
 using _Scripts.Netcore.Data.Attributes;
 using _Scripts.Netcore.Data.ConnectionData;
 using _Scripts.Netcore.NetworkComponents.NetworkVariableComponent;
-using _Scripts.Netcore.NetworkComponents.RootComponents;
-using _Scripts.Netcore.Proxy;
+using _Scripts.Netcore.NetworkComponents.RPCComponents;
+using _Scripts.Netcore.RPCSystem;
+using _Scripts.Netcore.RPCSystem.DynamicProcessor;
+using _Scripts.Netcore.RPCSystem.ProcessorsData;
 using _Scripts.Netcore.Runner;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -63,8 +65,8 @@ namespace _Scripts.Infrastructure
             await _networkRunner.StartClient(clientData);
 
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToServer));
-            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromClient");
-            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromClient");
+            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Tcp, "HelloFromClient");
+            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Udp, "HelloFromClient");
         }
 
         private async void SendServerEvents(int playerId)
@@ -72,8 +74,8 @@ namespace _Scripts.Infrastructure
             await UniTask.Delay(2000);
             
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToClient));
-            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Tcp, "HelloFromServer");
-            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, ProtocolType.Udp, "HelloFromServer");
+            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Tcp, "HelloFromServer");
+            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Udp, "HelloFromServer");
             
             _networkStringVariable.Value = 100;
         }

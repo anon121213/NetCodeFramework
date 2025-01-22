@@ -1,7 +1,7 @@
 using System.Threading;
 using UnityEngine;
 
-namespace _Scripts.Netcore.NetworkComponents.RootComponents
+namespace _Scripts.Netcore.NetworkComponents.RPCComponents
 {
     public abstract class NetworkBehaviour: MonoBehaviour, IRPCCaller
     {

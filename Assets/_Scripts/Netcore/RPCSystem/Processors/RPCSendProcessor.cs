@@ -8,7 +8,7 @@ using _Scripts.Netcore.Runner;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace _Scripts.Netcore.Proxy.Processors
+namespace _Scripts.Netcore.RPCSystem.Processors
 {
     public class RPCSendProcessor : IRPCSendProcessor
     {

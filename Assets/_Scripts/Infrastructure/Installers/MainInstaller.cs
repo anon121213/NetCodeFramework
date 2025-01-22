@@ -1,9 +1,9 @@
 ﻿using _Scripts.Netcore.FormatterSystem;
 using _Scripts.Netcore.Initializer;
-using _Scripts.Netcore.Proxy;
-using _Scripts.Netcore.Proxy.Callers;
-using _Scripts.Netcore.Proxy.DynamicProcessor;
-using _Scripts.Netcore.Proxy.Processors;
+using _Scripts.Netcore.RPCSystem;
+using _Scripts.Netcore.RPCSystem.Callers;
+using _Scripts.Netcore.RPCSystem.DynamicProcessor;
+using _Scripts.Netcore.RPCSystem.Processors;
 using _Scripts.Netcore.Runner;
 using VContainer;
 using VContainer.Unity;

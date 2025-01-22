@@ -1,7 +1,7 @@
 ﻿using System;
 using MessagePack;
 
-namespace _Scripts.Netcore.Data
+namespace _Scripts.Netcore.Data.Message
 {
     [MessagePackObject]
     [Serializable]
@@ -12,5 +12,12 @@ namespace _Scripts.Netcore.Data
         [Key(2)] public string ClassType { get; set; }
         [Key(3)] public byte[] MethodParam { get; set; }
         [Key(4)] public int InstanceId { get; set; }
+        [Key(5)] public CallerTypes CallerType { get; set; }
+    }
+
+    public enum CallerTypes
+    {
+        Service = 0,
+        Behaviour = 1
     }
 }

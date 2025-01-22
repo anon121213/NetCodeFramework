@@ -13,7 +13,7 @@ namespace _Scripts.Netcore.FormatterSystem
             var formatters = new IMessagePackFormatter[]
             {
                 new Vector3Formatter(),
-                new QuaternionFormatter()
+                new QuaternionFormatter(),
             };
 
             var resolvers = new IFormatterResolver[]

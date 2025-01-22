@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using _Scripts.Netcore.Data.ConnectionData;
 using _Scripts.Netcore.Initializer;
-using _Scripts.Netcore.Proxy;
+using _Scripts.Netcore.RPCSystem;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 

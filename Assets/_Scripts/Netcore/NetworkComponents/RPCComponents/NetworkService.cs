@@ -1,10 +1,10 @@
 using System.Threading;
 
-namespace _Scripts.Netcore.NetworkComponents.RootComponents
+namespace _Scripts.Netcore.NetworkComponents.RPCComponents
 {
     public abstract class NetworkService : IRPCCaller
     {
-        private int _instanceCounter;
+        private static int _instanceCounter;
 
         public int InstanceId { get; private set; }
 
