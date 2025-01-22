@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace _Scripts.Netcore.NetworkComponents.RPCComponents
 {
-    public abstract class NetworkBehaviour: MonoBehaviour, IRPCCaller
+    public abstract class NetworkBehaviour: MonoBehaviour, IRPCCaller, INetworkComponent
     {
         private static int _instanceCounter;
 
@@ -11,5 +11,9 @@ namespace _Scripts.Netcore.NetworkComponents.RPCComponents
 
         public void InitializeNetworkBehaviour() => 
             InstanceId = Interlocked.Increment(ref _instanceCounter);
+    }
+
+    public interface INetworkComponent
+    {
     }
 }

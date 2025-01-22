@@ -1,9 +1,7 @@
-﻿using System.Net.Sockets;
-using System.Reflection;
+﻿using System.Reflection;
 using _Scripts.Netcore.Data.Attributes;
 using _Scripts.Netcore.NetworkComponents.RPCComponents;
 using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.DynamicProcessor;
 using _Scripts.Netcore.RPCSystem.ProcessorsData;
 using _Scripts.Netcore.Runner;
 using UnityEngine;
@@ -33,10 +31,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkTransformComponent
         {
             _networkRunner = networkRunner;
             _networkRunner.OnPlayerConnected += _ => InitServerPosition();
-        }
-
-        private void Awake()
-        {
+            
             _onPositionChangeMethod = typeof(NetworkTransform).GetMethod(nameof(OnPositionChange));
             _onRotationChangeMethod = typeof(NetworkTransform).GetMethod(nameof(OnRotationChange));
             _onScaleChangeMethod = typeof(NetworkTransform).GetMethod(nameof(OnScaleChange));

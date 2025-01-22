@@ -9,6 +9,7 @@ using _Scripts.Netcore.RPCSystem;
 using _Scripts.Netcore.RPCSystem.DynamicProcessor;
 using _Scripts.Netcore.RPCSystem.ProcessorsData;
 using _Scripts.Netcore.Runner;
+using _Scripts.Netcore.Spawner;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer.Unity;
@@ -18,13 +19,19 @@ namespace _Scripts.Infrastructure
     public class Bootstrapper : NetworkService, IInitializable 
     {
         private readonly INetworkRunner _networkRunner;
+        private readonly INetworkSpawner _networkSpawner;
+        private readonly GameObject _gameObject;
 
         private readonly INetworkVariable<int> _networkStringVariable = 
             new NetworkVariable<int>("TestVar", 0);
 
-        public Bootstrapper(INetworkRunner networkRunner)
+        public Bootstrapper(INetworkRunner networkRunner,
+            INetworkSpawner networkSpawner,
+            GameObject gameObject)
         {
             _networkRunner = networkRunner;
+            _networkSpawner = networkSpawner;
+            _gameObject = gameObject;
         }
         
         public async void Initialize()
@@ -76,6 +83,9 @@ namespace _Scripts.Infrastructure
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToClient));
             RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Tcp, "HelloFromServer");
             RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Udp, "HelloFromServer");
+            
+            var go = _networkSpawner.Spawn(_gameObject, Vector3.zero, Quaternion.identity, Vector3.one);
+            _networkSpawner.Spawn(_gameObject, Vector3.one * 3, Quaternion.identity, Vector3.one, go.transform);
             
             _networkStringVariable.Value = 100;
         }
