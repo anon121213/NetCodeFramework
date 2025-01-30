@@ -7,6 +7,7 @@ using _Scripts.Netcore.RPCSystem.DynamicProcessor;
 using _Scripts.Netcore.RPCSystem.Processors;
 using _Scripts.Netcore.Runner;
 using _Scripts.Netcore.Spawner;
+using _Scripts.Netcore.Spawner.ObjectsSyncer;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -30,6 +31,7 @@ namespace _Scripts.Infrastructure.Installers
             builder.Register<IRPCSendProcessor, RPCSendProcessor>(Lifetime.Singleton);
             builder.Register<IDynamicProcessorService, DynamicProcessorService>(Lifetime.Singleton);
             builder.Register<INetworkInitializer, NetworkInitializer>(Lifetime.Singleton);
+            builder.Register<INetworkObjectSyncer, NetworkObjectsSyncer>(Lifetime.Singleton);
             builder.Register<INetworkSpawner, NetworkSpawner>(Lifetime.Singleton).WithParameter(_networkObjectsConfig);
             
             builder.RegisterInstance(GameObject);

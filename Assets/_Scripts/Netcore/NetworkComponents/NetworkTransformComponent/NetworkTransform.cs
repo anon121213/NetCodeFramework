@@ -11,116 +11,92 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkTransformComponent
 {
     public class NetworkTransform : NetworkBehaviour
     {
+        private readonly MethodInfo _methodInfo = typeof(NetworkTransform).GetMethod(nameof(OnTransformUpdate));
+
         [SerializeField] private bool _enableInterpolation = true;
         [SerializeField] private bool _enablePrediction = true;
-        
-        [SerializeField] private float _lerpSpeed = 3f; 
-        [SerializeField] private float _predictTime = 0.1f; 
-        
+        [SerializeField] private float _lerpSpeed = 10f;
+        [SerializeField] private float _predictTime = 0.1f;
+        [SerializeField] private float _teleportThreshold = 2f;
+
         private Vector3 _lastPosition;
         private Quaternion _lastRotation;
         private Vector3 _lastScale;
-        
-        private MethodInfo _onPositionChangeMethod;
-        private MethodInfo _onRotationChangeMethod;
-        private MethodInfo _onScaleChangeMethod;
         private INetworkRunner _networkRunner;
 
         [Inject]
         public void Initialize(INetworkRunner networkRunner)
         {
             _networkRunner = networkRunner;
-            _networkRunner.OnPlayerConnected += _ => InitServerPosition();
-            
-            _onPositionChangeMethod = typeof(NetworkTransform).GetMethod(nameof(OnPositionChange));
-            _onRotationChangeMethod = typeof(NetworkTransform).GetMethod(nameof(OnRotationChange));
-            _onScaleChangeMethod = typeof(NetworkTransform).GetMethod(nameof(OnScaleChange));
-
             _lastPosition = transform.position;
             _lastRotation = transform.rotation;
             _lastScale = transform.localScale;
-            
             RPCInvoker.RegisterRPCInstance<NetworkTransform>(this);
-        }
-
-        private void InitServerPosition()
-        {
-            InvokePosition();
-            InvokeRotation();
-            InvokeScale();
         }
 
         private void LateUpdate()
         {
-            if(!_networkRunner.IsServer)
+            if (!_networkRunner.IsServer)
                 return;
 
-            if (transform.position != _lastPosition)
-                InvokePosition();
-            else if (transform.rotation != _lastRotation)
-                InvokeRotation();
-            else if (transform.localScale != _lastScale)
-                InvokeScale();
+            bool positionChanged = Vector3.Distance(transform.position, _lastPosition) > 0.01f;
+            bool rotationChanged = Quaternion.Angle(transform.rotation, _lastRotation) > 0.1f;
+            bool scaleChanged = transform.localScale != _lastScale;
+
+            if (positionChanged || rotationChanged || scaleChanged)
+            {
+                RPCInvoker.InvokeBehaviourRPC<NetworkTransform>(this, _methodInfo,
+                    NetProtocolType.Udp, transform.position, transform.rotation, transform.localScale);
+
+                _lastPosition = transform.position;
+                _lastRotation = transform.rotation;
+                _lastScale = transform.localScale;
+            }
         }
 
-        private void InvokePosition()
-        {
-            RPCInvoker.InvokeBehaviourRPC<NetworkTransform>(this,
-                _onPositionChangeMethod, NetProtocolType.Udp, transform.position);
-
-            _lastPosition = transform.position;
-        } 
-        
-        private void InvokeRotation()
-        {
-            RPCInvoker.InvokeBehaviourRPC<NetworkTransform>(this,
-                _onRotationChangeMethod, NetProtocolType.Udp, transform.rotation);
-
-            _lastRotation = transform.rotation;
-        }
-        
-        private void InvokeScale()
-        {
-            RPCInvoker.InvokeBehaviourRPC<NetworkTransform>(this,
-                _onScaleChangeMethod, NetProtocolType.Udp, transform.localScale);
-
-            _lastScale = transform.localScale;
-        }
-        
         [ClientRPC]
-        public void OnPositionChange(Vector3 newPosition)
+        public void OnTransformUpdate(Vector3 newPosition, Quaternion newRotation, Vector3 newScale)
         {
-            transform.position = newPosition;
-
-            if (_enableInterpolation)
-                InterpolateMovement();
+            if (Vector3.Distance(transform.position, newPosition) > _teleportThreshold)
+            {
+                transform.position = newPosition;
+                transform.rotation = newRotation;
+                transform.localScale = newScale;
+            }
+            else if (_enableInterpolation)
+                InterpolateMovement(newPosition, newRotation, newScale);
             else if (_enablePrediction)
-                PredictMovement();
+                PredictMovement(newPosition);
+            else
+            {
+                transform.position = newPosition;
+                transform.rotation = newRotation;
+                transform.localScale = newScale;
+            }
+
+            _lastPosition = newPosition;
+            _lastRotation = newRotation;
+            _lastScale = newScale;
         }
 
-        [ClientRPC]
-        public void OnRotationChange(Quaternion newRotation)
+        private void InterpolateMovement(Vector3 targetPosition, Quaternion targetRotation, Vector3 targetScale)
         {
-            transform.rotation = newRotation;
+            float lerpFactor = 1f - Mathf.Exp(-_lerpSpeed * Time.deltaTime);
+            transform.position = Vector3.Lerp(transform.position, targetPosition, lerpFactor);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, lerpFactor);
+            transform.localScale = Vector3.Lerp(transform.localScale, targetScale, lerpFactor);
         }
 
-        [ClientRPC]
-        public void OnScaleChange(Vector3 newScale)
+        private void PredictMovement(Vector3 targetPosition)
         {
-            transform.localScale = newScale;
-        }
-
-        private void InterpolateMovement()
-        {
-            transform.position = Vector3.Lerp(transform.position, _lastPosition, Time.deltaTime * _lerpSpeed);
-            transform.rotation = Quaternion.Lerp(transform.rotation, _lastRotation, Time.deltaTime * _lerpSpeed);
-            transform.localScale = Vector3.Lerp(transform.localScale, _lastScale, Time.deltaTime * _lerpSpeed);
-        }
-
-        private void PredictMovement()
-        {
-            Vector3 predictedPosition = transform.position + (transform.position - _lastPosition) * _predictTime;
+            Vector3 predictedPosition = targetPosition + (targetPosition - _lastPosition) * _predictTime;
             transform.position = predictedPosition;
+        }
+
+        public void ForceSyncTransform()
+        {
+            RPCInvoker.InvokeBehaviourRPC<NetworkTransform>(this, _methodInfo,
+                NetProtocolType.Udp, transform.position, transform.rotation, transform.localScale);
         }
     }
 }

@@ -1,15 +1,14 @@
 ﻿using System.Net;
-using System.Net.Sockets;
 using System.Reflection;
 using _Scripts.Netcore.Data.Attributes;
 using _Scripts.Netcore.Data.ConnectionData;
 using _Scripts.Netcore.NetworkComponents.NetworkVariableComponent;
 using _Scripts.Netcore.NetworkComponents.RPCComponents;
 using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.DynamicProcessor;
 using _Scripts.Netcore.RPCSystem.ProcessorsData;
 using _Scripts.Netcore.Runner;
 using _Scripts.Netcore.Spawner;
+using _Scripts.Netcore.Spawner.ObjectsSyncer;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer.Unity;
@@ -21,17 +20,20 @@ namespace _Scripts.Infrastructure
         private readonly INetworkRunner _networkRunner;
         private readonly INetworkSpawner _networkSpawner;
         private readonly GameObject _gameObject;
+        private readonly INetworkObjectSyncer _networkObjectSyncer;
 
         private readonly INetworkVariable<int> _networkStringVariable = 
             new NetworkVariable<int>("TestVar", 0);
 
         public Bootstrapper(INetworkRunner networkRunner,
             INetworkSpawner networkSpawner,
-            GameObject gameObject)
+            GameObject gameObject,
+            INetworkObjectSyncer networkObjectSyncer)
         {
             _networkRunner = networkRunner;
             _networkSpawner = networkSpawner;
             _gameObject = gameObject;
+            _networkObjectSyncer = networkObjectSyncer;
         }
         
         public async void Initialize()
@@ -56,6 +58,10 @@ namespace _Scripts.Infrastructure
             };
 
             await _networkRunner.StartServer(serverData);
+            
+            var go = _networkSpawner.Spawn(_gameObject, Vector3.zero, Quaternion.identity, Vector3.one);
+            _networkSpawner.Spawn(_gameObject, Vector3.one * 3, Quaternion.identity, Vector3.one, go.transform);
+            
             _networkRunner.OnPlayerConnected += SendServerEvents;
         }
 
@@ -78,14 +84,13 @@ namespace _Scripts.Infrastructure
 
         private async void SendServerEvents(int playerId)
         {
-            await UniTask.Delay(2000);
+            await UniTask.Delay(1000);
             
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToClient));
-            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Tcp, "HelloFromServer");
-            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Udp, "HelloFromServer");
+            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Tcp, "HelloFromServerTcp");
+            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Udp, "HelloFromServerUdp");
             
-            var go = _networkSpawner.Spawn(_gameObject, Vector3.zero, Quaternion.identity, Vector3.one);
-            _networkSpawner.Spawn(_gameObject, Vector3.one * 3, Quaternion.identity, Vector3.one, go.transform);
+            _networkSpawner.Sync();
             
             _networkStringVariable.Value = 100;
         }

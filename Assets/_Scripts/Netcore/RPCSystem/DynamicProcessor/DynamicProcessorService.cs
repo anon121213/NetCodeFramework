@@ -33,7 +33,7 @@ namespace _Scripts.Netcore.RPCSystem.DynamicProcessor
 
         public void Initialize()
         {
-            InitializeProcessors(3);
+            InitializeProcessors(5);
 
             StartQueueLoadCheck(_rpcReceiveProcessor.TcpReceiveQueue, NetProtocolType.Tcp, ProcessorType.Receive)
                 .AttachExternalCancellation(_checkerCancellationToken.Token);
@@ -89,7 +89,7 @@ namespace _Scripts.Netcore.RPCSystem.DynamicProcessor
 
                 if (queue.Count > 2)
                     StartNewProcessor(netProtocolType, processorType);
-                else if (queue.Count == 0 && count > 1) 
+                else if (queue.Count == 0 && count > 3) 
                     HandleProcessorStop(netProtocolType, processorType);
 
                 await UniTask.Delay(500);

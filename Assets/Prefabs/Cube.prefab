@@ -118,3 +118,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23792a38b9824d0fbdfe8ed0dffb95f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _enableInterpolation: 1
+  _enablePrediction: 1
+  _lerpSpeed: 1000
+  _predictTime: 0.1
+  _teleportThreshold: 2
