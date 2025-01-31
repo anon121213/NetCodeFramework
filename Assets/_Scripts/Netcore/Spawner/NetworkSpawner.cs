@@ -4,6 +4,7 @@ using _Scripts.Netcore.Data.NetworkObjects;
 using _Scripts.Netcore.NetworkComponents.RPCComponents;
 using _Scripts.Netcore.RPCSystem;
 using _Scripts.Netcore.RPCSystem.ProcessorsData;
+using _Scripts.Netcore.Runner;
 using _Scripts.Netcore.Spawner.ObjectsSyncer;
 using UnityEngine;
 using VContainer;
@@ -16,15 +17,20 @@ namespace _Scripts.Netcore.Spawner
         private readonly IObjectResolver _resolver;
         private readonly NetworkObjectsConfig _networkObjectsConfig;
         private readonly INetworkObjectSyncer _networkObjectSyncer;
+        private readonly INetworkRunner _networkRunner;
         private readonly MethodInfo _spawnMethodInfo;
 
+        private int _uniqueId = 0;
+        
         public NetworkSpawner(IObjectResolver resolver,
             NetworkObjectsConfig networkObjectsConfig,
-            INetworkObjectSyncer networkObjectSyncer)
+            INetworkObjectSyncer networkObjectSyncer,
+            INetworkRunner networkRunner)
         {
             _resolver = resolver;
             _networkObjectsConfig = networkObjectsConfig;
             _networkObjectSyncer = networkObjectSyncer;
+            _networkRunner = networkRunner;
             _spawnMethodInfo = typeof(NetworkSpawner).GetMethod(nameof(SpawnClientRpc));
             
             RPCInvoker.RegisterRPCInstance<NetworkSpawner>(this);
@@ -47,6 +53,9 @@ namespace _Scripts.Netcore.Spawner
 
         private GameObject SpawnLocal(GameObject prefab, Vector3 position, Quaternion rotation, Vector3 scale, Transform transform)
         {
+            if (!_networkRunner.IsServer)
+                return null;
+            
             if (prefab.GetComponentInChildren<INetworkComponent>() == null)
                 return null;
 
@@ -56,7 +65,9 @@ namespace _Scripts.Netcore.Spawner
             GameObject go = _resolver.Instantiate(prefab, position, rotation, transform);
             go.transform.localScale = scale;
             
-            _networkObjectSyncer.AddNetworkObject(id, go);
+            _networkObjectSyncer.AddNetworkObject(id, _uniqueId, go);
+
+            _uniqueId++;
             
             RPCInvoker.InvokeServiceRPC<NetworkSpawner>(this, _spawnMethodInfo,
                 NetProtocolType.Tcp, id, position, rotation, scale);
@@ -65,13 +76,18 @@ namespace _Scripts.Netcore.Spawner
         }
 
         [ClientRPC]
-        public void SpawnClientRpc(int gameObjectId, Vector3 position, Quaternion rotation, Vector3 scale)
+        public void SpawnClientRpc(int gameObjectId, int uniqueId, Vector3 position, Quaternion rotation, Vector3 scale)
         {
+            if (_networkObjectSyncer.CheckSyncObject(gameObjectId, uniqueId))
+                return;
+            
             if (!_networkObjectsConfig.TryGetNetworkObject(gameObjectId, out GameObject networkObject))
                 return;
 
             GameObject networkObj = _resolver.Instantiate(networkObject, position, rotation);
             networkObj.transform.localScale = scale;
+            
+            _networkObjectSyncer.AddNetworkObject(gameObjectId, uniqueId, networkObj);
         }
     }
 }

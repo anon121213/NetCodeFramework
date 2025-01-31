@@ -35,12 +35,12 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkRbComponent
         {
             _networkRunner = networkRunner;
             
+            _rb = GetComponent<Rigidbody>(); 
+            _networkTransform = GetComponent<NetworkTransform>(); 
+            
             _lastPosition = _rb.position;
             _lastVelocity = _rb.velocity;
             _lastAngularVelocity = _rb.angularVelocity;
-            
-            _networkTransform = GetComponent<NetworkTransform>(); 
-            _rb = GetComponent<Rigidbody>(); 
             
             RPCInvoker.RegisterRPCInstance<NetworkRigidbody>(this);
         }
