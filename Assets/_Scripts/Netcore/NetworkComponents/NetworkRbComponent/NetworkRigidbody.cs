@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
 using Skynet.Data.Attributes;
 using Skynet.NetworkComponents.NetworkTransformComponent;
-using Skynet.NetworkComponents.RPCComponents;
-using Skynet.RPCSystem;
-using Skynet.RPCSystem.ProcessorsData;
+using Skynet.NetworkComponents.RpcComponents;
+using Skynet.RpcSystem;
+using Skynet.RpcSystem.ProcessorsData;
 using Skynet.Runner;
 using UnityEngine;
 using VContainer;
@@ -42,7 +42,7 @@ namespace Skynet.NetworkComponents.NetworkRbComponent
             _lastVelocity = _rb.linearVelocity;
             _lastAngularVelocity = _rb.angularVelocity;
             
-            RPCInvoker.RegisterRPCInstance<NetworkRigidbody>(this);
+            RpcInvoker.RegisterRpcInstance<NetworkRigidbody>(this);
         }
 
         private void FixedUpdate()
@@ -64,7 +64,7 @@ namespace Skynet.NetworkComponents.NetworkRbComponent
 
         private void InvokeVelocity()
         {
-            RPCInvoker.InvokeBehaviourRPC<NetworkRigidbody>(this, _methodInfoOnVelocityChange,
+            RpcInvoker.InvokeBehaviourRpc<NetworkRigidbody>(this, _methodInfoOnVelocityChange,
                 NetProtocolType.Udp, _rb.linearVelocity);
 
             _lastVelocity = _rb.linearVelocity;
@@ -72,13 +72,13 @@ namespace Skynet.NetworkComponents.NetworkRbComponent
 
         private void InvokeAngularVelocity()
         {
-            RPCInvoker.InvokeBehaviourRPC<NetworkRigidbody>(this, _methodInfoOnAngularVelocityChange,
+            RpcInvoker.InvokeBehaviourRpc<NetworkRigidbody>(this, _methodInfoOnAngularVelocityChange,
                 NetProtocolType.Udp, _rb.angularVelocity);
 
             _lastAngularVelocity = _rb.angularVelocity;
         }
 
-        [ClientRPC]
+        [ClientRpc]
         public void OnVelocityChange(Vector3 velocity)
         {
             _rb.linearVelocity = velocity;
@@ -87,7 +87,7 @@ namespace Skynet.NetworkComponents.NetworkRbComponent
                 PredictMovement();
         }
 
-        [ClientRPC]
+        [ClientRpc]
         public void OnAngularVelocityChange(Vector3 angularVelocity) =>
             _rb.angularVelocity = angularVelocity;
 

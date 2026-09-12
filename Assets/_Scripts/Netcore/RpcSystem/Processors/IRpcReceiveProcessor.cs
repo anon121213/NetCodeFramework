@@ -2,7 +2,7 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-namespace Skynet.RPCSystem.Processors
+namespace Skynet.RpcSystem.Processors
 {
     public interface IRpcReceiveProcessor
     {

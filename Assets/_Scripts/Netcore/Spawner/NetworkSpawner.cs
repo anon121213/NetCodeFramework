@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
 using Skynet.Data.Attributes;
 using Skynet.Data.NetworkObjects;
-using Skynet.NetworkComponents.RPCComponents;
-using Skynet.RPCSystem;
-using Skynet.RPCSystem.ProcessorsData;
+using Skynet.NetworkComponents.RpcComponents;
+using Skynet.RpcSystem;
+using Skynet.RpcSystem.ProcessorsData;
 using Skynet.Runner;
 using Skynet.Spawner.ObjectsSyncer;
 using UnityEngine;
@@ -31,7 +31,7 @@ namespace Skynet.Spawner
             _networkRunner = networkRunner;
             _spawnMethodInfo = typeof(NetworkSpawner).GetMethod(nameof(SpawnClientRpc));
             
-            RPCInvoker.RegisterRPCInstance<NetworkSpawner>(this);
+            RpcInvoker.RegisterRpcInstance<NetworkSpawner>(this);
         }
 
         public NetworkObject Spawn(NetworkObject prefab, Transform transform = null) => 
@@ -68,13 +68,13 @@ namespace Skynet.Spawner
             
             _networkObjectSyncer.AddNetworkObject(id, networkObject);
 
-            RPCInvoker.InvokeServiceRPC<NetworkSpawner>(this, _spawnMethodInfo,
+            RpcInvoker.InvokeServiceRpc<NetworkSpawner>(this, _spawnMethodInfo,
                 NetProtocolType.Tcp, id, uniqueId, position, rotation, scale);
 
             return networkObject;
         }
 
-        [ClientRPC]
+        [ClientRpc]
         public void SpawnClientRpc(int prefabId, int uniqueId, Vector3 position, Quaternion rotation, Vector3 scale)
         {
             if (_networkObjectSyncer.CheckSyncObject(prefabId, uniqueId))

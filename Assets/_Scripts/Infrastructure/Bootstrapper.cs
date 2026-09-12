@@ -4,9 +4,9 @@ using System.Threading;
 using Skynet.Data.Attributes;
 using Skynet.Data.ConnectionData;
 using Skynet.NetworkComponents.NetworkVariableComponent;
-using Skynet.NetworkComponents.RPCComponents;
-using Skynet.RPCSystem;
-using Skynet.RPCSystem.ProcessorsData;
+using Skynet.NetworkComponents.RpcComponents;
+using Skynet.RpcSystem;
+using Skynet.RpcSystem.ProcessorsData;
 using Skynet.Runner;
 using Skynet.Spawner;
 using Skynet.Spawner.ObjectsSyncer;
@@ -39,7 +39,7 @@ namespace _Scripts.Infrastructure
         
         public async Awaitable StartAsync(CancellationToken cancellation = default)
         {
-            RPCInvoker.RegisterRPCInstance<Bootstrapper>(this);
+            RpcInvoker.RegisterRpcInstance<Bootstrapper>(this);
             
             _networkStringVariable.OnValueChanged += i => Debug.Log($"Value has been changed on: {i}");
 #if SERVER
@@ -79,8 +79,8 @@ namespace _Scripts.Infrastructure
             await _networkRunner.StartClient(clientData);
 
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToServer));
-            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Tcp, "HelloFromClient");
-            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Udp, "HelloFromClient");
+            RpcInvoker.InvokeServiceRpc<Bootstrapper>(this, methodInfo, NetProtocolType.Tcp, "HelloFromClient");
+            RpcInvoker.InvokeServiceRpc<Bootstrapper>(this, methodInfo, NetProtocolType.Udp, "HelloFromClient");
         }
 
         private async UniTask SendServerEvents(int playerId)
@@ -88,21 +88,21 @@ namespace _Scripts.Infrastructure
             await UniTask.Delay(1000);
             
             MethodInfo methodInfo = typeof(Bootstrapper).GetMethod(nameof(SendToClient));
-            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Tcp, "HelloFromServerTcp");
-            RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Udp, "HelloFromServerUdp");
+            RpcInvoker.InvokeServiceRpc<Bootstrapper>(this, methodInfo, NetProtocolType.Tcp, "HelloFromServerTcp");
+            RpcInvoker.InvokeServiceRpc<Bootstrapper>(this, methodInfo, NetProtocolType.Udp, "HelloFromServerUdp");
             
             _networkSpawner.Sync();
             
             _networkStringVariable.Value = 100;
         }
 
-        [ClientRPC]
+        [ClientRpc]
         public void SendToClient(string text)
         {
             Debug.Log(text);
         }
 
-        [ServerRPC]
+        [ServerRpc]
         public void SendToServer(string text)
         {
             Debug.Log(text);

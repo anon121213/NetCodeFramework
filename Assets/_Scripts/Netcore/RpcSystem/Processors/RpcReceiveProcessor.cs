@@ -4,22 +4,22 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Skynet.Data.Message;
-using Skynet.NetworkComponents.RPCComponents;
-using Skynet.RPCSystem.Callers;
+using Skynet.NetworkComponents.RpcComponents;
+using Skynet.RpcSystem.Callers;
 using Cysharp.Threading.Tasks;
 using MessagePack;
 using UnityEngine;
 
-namespace Skynet.RPCSystem.Processors
+namespace Skynet.RpcSystem.Processors
 {
-    public class RpcReceiveReceiveProcessor : IRpcReceiveProcessor
+    public class RpcReceiveProcessor : IRpcReceiveProcessor
     {
         private readonly ICallerService _callerService;
 
         public ConcurrentQueue<byte[]> TcpReceiveQueue { get; } = new();
         public ConcurrentQueue<byte[]> UdpReceiveQueue { get; } = new();
 
-        public RpcReceiveReceiveProcessor(ICallerService callerService) => 
+        public RpcReceiveProcessor(ICallerService callerService) => 
             _callerService = callerService;
 
         public async UniTask ProcessTcpReceiveQueue(CancellationToken cancellationToken)
@@ -65,14 +65,14 @@ namespace Skynet.RPCSystem.Processors
 
             if (message.CallerType == CallerTypes.Behaviour)
             {
-                if (_callerService.CallerBehaviours.TryGetValue(new CallerKey(callerType, message.InstanceId), out IRPCCaller rpcCaller))
+                if (_callerService.CallerBehaviours.TryGetValue(new CallerKey(callerType, message.InstanceId), out IRpcCaller rpcCaller))
                     method.Invoke(rpcCaller, parameters);
                 else
                     Debug.LogError($"You try invoke method: {method.Name} in {callerType} who not register as behaviour caller" );
             }
             else
             {
-                if (_callerService.CallerServices.TryGetValue(new CallerKey(callerType, message.InstanceId), out IRPCCaller rpcCaller))
+                if (_callerService.CallerServices.TryGetValue(new CallerKey(callerType, message.InstanceId), out IRpcCaller rpcCaller))
                     method.Invoke(rpcCaller, parameters);
                 else
                     Debug.LogError($"You try invoke method: {method.Name} in {callerType} who not register as service caller" );

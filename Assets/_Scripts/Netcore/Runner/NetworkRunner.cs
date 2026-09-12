@@ -4,13 +4,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
-using _Scripts.Netcore.RPCSystem;
+using Skynet.RpcSystem;
 using Skynet.Data.Attributes;
 using Skynet.Data.ConnectionData;
 using Skynet.Initializer;
-using Skynet.NetworkComponents.RPCComponents;
-using Skynet.RPCSystem;
-using Skynet.RPCSystem.ProcessorsData;
+using Skynet.NetworkComponents.RpcComponents;
+using Skynet.RpcSystem;
+using Skynet.RpcSystem.ProcessorsData;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -51,7 +51,7 @@ namespace Skynet.Runner
         {
             _rpcListener = rpcListener;
             networkInitializer.Initialize(this);
-            RPCInvoker.RegisterRPCInstance<NetworkRunner>(this);
+            RpcInvoker.RegisterRpcInstance<NetworkRunner>(this);
         }
         
         public async UniTask StartServer(ConnectServerData connectServerData)
@@ -123,12 +123,12 @@ namespace Skynet.Runner
 
                 OnPlayerConnected?.Invoke(playerIndex);
                 await UniTask.Delay(1000);
-                RPCInvoker.InvokeServiceRPC<NetworkRunner>(this, _methodInfo, NetProtocolType.Tcp, playerIndex);
+                RpcInvoker.InvokeServiceRpc<NetworkRunner>(this, _methodInfo, NetProtocolType.Tcp, playerIndex);
                 Debug.Log($"Клиент подключен: {clientSocket.RemoteEndPoint}");
             }
         }
 
-        [ClientRPC]
+        [ClientRpc]
         public void SetPlayerId(int id)
         {
             if (_isSettedPlayerId)

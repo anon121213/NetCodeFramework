@@ -1,49 +1,49 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using _Scripts.Netcore.RPCSystem.Processors;
+using Skynet.RpcSystem.Processors;
 using Skynet.Data.Attributes;
 using Skynet.Data.Message;
-using Skynet.NetworkComponents.RPCComponents;
-using Skynet.RPCSystem.Callers;
-using Skynet.RPCSystem.Processors;
-using Skynet.RPCSystem.ProcessorsData;
+using Skynet.NetworkComponents.RpcComponents;
+using Skynet.RpcSystem.Callers;
+using Skynet.RpcSystem.Processors;
+using Skynet.RpcSystem.ProcessorsData;
 using MessagePack;
 using UnityEngine;
 
-namespace Skynet.RPCSystem
+namespace Skynet.RpcSystem
 {
-    public static class RPCInvoker
+    public static class RpcInvoker
     {
         private static ICallerService _callerService;
-        private static IRPCSendProcessor _sendProcessor;
+        private static IRpcSendProcessor _sendProcessor;
 
-        public static void Initialize(IRPCSendProcessor sendProcessor,
+        public static void Initialize(IRpcSendProcessor sendProcessor,
             ICallerService callerService)
         {
             _sendProcessor = sendProcessor;
             _callerService = callerService;
         }
         
-        public static void RegisterRPCInstance<T>(NetworkService caller) where T : IRPCCaller => 
+        public static void RegisterRpcInstance<T>(NetworkService caller) where T : IRpcCaller => 
             _callerService.AddCaller(typeof(T), caller);
 
-        public static void RegisterRPCInstance<T>(NetworkBehaviour caller) where T : IRPCCaller => 
+        public static void RegisterRpcInstance<T>(NetworkBehaviour caller) where T : IRpcCaller => 
             _callerService.AddCaller(typeof(T), caller);
 
-        public static void InvokeBehaviourRPC<TObject>(NetworkBehaviour networkBehaviour, MethodInfo methodInfo,
+        public static void InvokeBehaviourRpc<TObject>(NetworkBehaviour networkBehaviour, MethodInfo methodInfo,
             NetProtocolType protocolType, params object[] parameters) where TObject : NetworkBehaviour =>
             InvokeRPC<TObject>(networkBehaviour.InstanceId, CallerTypes.Behaviour, methodInfo, protocolType, parameters);
 
-        public static void InvokeServiceRPC<TObject>(NetworkService networkService, MethodInfo methodInfo,
+        public static void InvokeServiceRpc<TObject>(NetworkService networkService, MethodInfo methodInfo,
             NetProtocolType protocolType, params object[] parameters) where TObject : NetworkService =>
             InvokeRPC<TObject>(networkService.InstanceId, CallerTypes.Service, methodInfo, protocolType, parameters);
         
         private static void InvokeRPC<TObject>(int instanceID, CallerTypes callerType, MethodInfo methodInfo, NetProtocolType protocolType,
             params object[] parameters) where TObject : class
         {
-            if (methodInfo.GetCustomAttribute<ClientRPC>() == null &&
-                methodInfo.GetCustomAttribute<ServerRPC>() == null)
+            if (methodInfo.GetCustomAttribute<ClientRpc>() == null &&
+                methodInfo.GetCustomAttribute<ServerRpc>() == null)
             {
                 Debug.LogError($"Method: {methodInfo.Name} must have RPC attributes.");
                 return;

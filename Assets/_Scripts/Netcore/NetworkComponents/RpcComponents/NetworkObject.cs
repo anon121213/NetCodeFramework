@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Skynet.NetworkComponents.RPCComponents
+namespace Skynet.NetworkComponents.RpcComponents
 {
     public class NetworkObject : MonoBehaviour, INetworkComponent
     {

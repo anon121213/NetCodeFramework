@@ -4,16 +4,16 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Skynet.RPCSystem.Processors;
+using Skynet.RpcSystem.Processors;
 using UnityEngine;
 
-namespace _Scripts.Netcore.RPCSystem
+namespace Skynet.RpcSystem
 {
-    public class RPCListener : IRpcListener
+    public class RpcListener : IRpcListener
     {
         private readonly IRpcReceiveProcessor _receiveProcessor;
 
-        public RPCListener(IRpcReceiveProcessor receiveProcessor)
+        public RpcListener(IRpcReceiveProcessor receiveProcessor)
         {
             _receiveProcessor = receiveProcessor;
         }

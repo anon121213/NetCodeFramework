@@ -1,6 +1,6 @@
-namespace Skynet.NetworkComponents.RPCComponents
+namespace Skynet.NetworkComponents.RpcComponents
 {
-    public abstract class NetworkService : IRPCCaller
+    public abstract class NetworkService : IRpcCaller
     {
         public int InstanceId { get; private set; }
 

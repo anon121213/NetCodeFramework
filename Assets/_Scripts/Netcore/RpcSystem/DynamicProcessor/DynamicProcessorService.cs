@@ -2,12 +2,12 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using _Scripts.Netcore.RPCSystem.Processors;
-using Skynet.RPCSystem.Processors;
-using Skynet.RPCSystem.ProcessorsData;
+using Skynet.RpcSystem.Processors;
+using Skynet.RpcSystem.Processors;
+using Skynet.RpcSystem.ProcessorsData;
 using Cysharp.Threading.Tasks;
 
-namespace Skynet.RPCSystem.DynamicProcessor
+namespace Skynet.RpcSystem.DynamicProcessor
 {
     public class DynamicProcessorService : IDynamicProcessorService, IDisposable
     {
@@ -15,9 +15,9 @@ namespace Skynet.RPCSystem.DynamicProcessor
         private readonly CancellationTokenSource _checkerCancellationToken = new();
         
         private readonly IRpcReceiveProcessor _rpcReceiveProcessor;
-        private readonly IRPCSendProcessor _rpcSendProcessor;
+        private readonly IRpcSendProcessor _rpcSendProcessor;
 
-        public DynamicProcessorService(IRpcReceiveProcessor rpcReceiveProcessor, IRPCSendProcessor rpcSendProcessor)
+        public DynamicProcessorService(IRpcReceiveProcessor rpcReceiveProcessor, IRpcSendProcessor rpcSendProcessor)
         {
             _rpcReceiveProcessor = rpcReceiveProcessor;
             _rpcSendProcessor = rpcSendProcessor;

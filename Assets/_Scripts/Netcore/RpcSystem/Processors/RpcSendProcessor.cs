@@ -8,9 +8,9 @@ using Cysharp.Threading.Tasks;
 using Skynet.Runner;
 using UnityEngine;
 
-namespace _Scripts.Netcore.RPCSystem.Processors
+namespace Skynet.RpcSystem.Processors
 {
-    public class RPCSendProcessor : IRPCSendProcessor
+    public class RpcSendProcessor : IRpcSendProcessor
     {
         private INetworkRunner _networkRunner;
 
@@ -105,7 +105,7 @@ namespace _Scripts.Netcore.RPCSystem.Processors
         }
     }
 
-    public interface IRPCSendProcessor
+    public interface IRpcSendProcessor
     {
         void Initialize(INetworkRunner networkRunner);
         

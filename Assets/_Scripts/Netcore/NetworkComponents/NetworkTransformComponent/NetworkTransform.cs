@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using Skynet.Data.Attributes;
-using Skynet.NetworkComponents.RPCComponents;
-using Skynet.RPCSystem;
-using Skynet.RPCSystem.ProcessorsData;
+using Skynet.NetworkComponents.RpcComponents;
+using Skynet.RpcSystem;
+using Skynet.RpcSystem.ProcessorsData;
 using Skynet.Runner;
 using UnityEngine;
 using VContainer;
@@ -31,7 +31,7 @@ namespace Skynet.NetworkComponents.NetworkTransformComponent
             _lastPosition = transform.position;
             _lastRotation = transform.rotation;
             _lastScale = transform.localScale;
-            RPCInvoker.RegisterRPCInstance<NetworkTransform>(this);
+            RpcInvoker.RegisterRpcInstance<NetworkTransform>(this);
         }
 
         private void LateUpdate()
@@ -45,7 +45,7 @@ namespace Skynet.NetworkComponents.NetworkTransformComponent
 
             if (positionChanged || rotationChanged || scaleChanged)
             {
-                RPCInvoker.InvokeBehaviourRPC<NetworkTransform>(this, _methodInfo,
+                RpcInvoker.InvokeBehaviourRpc<NetworkTransform>(this, _methodInfo,
                     NetProtocolType.Udp, transform.position, transform.rotation, transform.localScale);
 
                 _lastPosition = transform.position;
@@ -54,7 +54,7 @@ namespace Skynet.NetworkComponents.NetworkTransformComponent
             }
         }
 
-        [ClientRPC]
+        [ClientRpc]
         public void OnTransformUpdate(Vector3 newPosition, Quaternion newRotation, Vector3 newScale)
         {
             if (Vector3.Distance(transform.position, newPosition) > _teleportThreshold)
@@ -95,7 +95,7 @@ namespace Skynet.NetworkComponents.NetworkTransformComponent
 
         public void ForceSyncTransform()
         {
-            RPCInvoker.InvokeBehaviourRPC<NetworkTransform>(this, _methodInfo,
+            RpcInvoker.InvokeBehaviourRpc<NetworkTransform>(this, _methodInfo,
                 NetProtocolType.Udp, transform.position, transform.rotation, transform.localScale);
         }
     }

@@ -1,9 +1,9 @@
 using UnityEngine;
 
-namespace Skynet.NetworkComponents.RPCComponents
+namespace Skynet.NetworkComponents.RpcComponents
 {
     [RequireComponent(typeof(NetworkObject))]
-    public abstract class NetworkBehaviour : MonoBehaviour, IRPCCaller, INetworkComponent
+    public abstract class NetworkBehaviour : MonoBehaviour, IRpcCaller, INetworkComponent
     {
         public int InstanceId { get; private set; } = -1;
 

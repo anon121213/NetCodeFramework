@@ -1,12 +1,12 @@
-﻿using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.Processors;
+﻿using Skynet.RpcSystem;
+using Skynet.RpcSystem.Processors;
 using Skynet.Data.NetworkObjects;
 using Skynet.FormatterSystem;
 using Skynet.Initializer;
-using Skynet.NetworkComponents.RPCComponents;
-using Skynet.RPCSystem.Callers;
-using Skynet.RPCSystem.DynamicProcessor;
-using Skynet.RPCSystem.Processors;
+using Skynet.NetworkComponents.RpcComponents;
+using Skynet.RpcSystem.Callers;
+using Skynet.RpcSystem.DynamicProcessor;
+using Skynet.RpcSystem.Processors;
 using Skynet.Runner;
 using Skynet.Spawner;
 using Skynet.Spawner.ObjectsSyncer;
@@ -27,10 +27,10 @@ namespace _Scripts.Infrastructure.Installers
             
             builder.Register<INetworkRunner, NetworkRunner>(Lifetime.Singleton);
             builder.Register<INetworkFormatter, NetworkFormatter>(Lifetime.Singleton);
-            builder.Register<IRpcListener, RPCListener>(Lifetime.Singleton);
+            builder.Register<IRpcListener, RpcListener>(Lifetime.Singleton);
             builder.Register<ICallerService, CallerService>(Lifetime.Singleton);
-            builder.Register<IRpcReceiveProcessor, RpcReceiveReceiveProcessor>(Lifetime.Singleton);
-            builder.Register<IRPCSendProcessor, RPCSendProcessor>(Lifetime.Singleton);
+            builder.Register<IRpcReceiveProcessor, RpcReceiveProcessor>(Lifetime.Singleton);
+            builder.Register<IRpcSendProcessor, RpcSendProcessor>(Lifetime.Singleton);
             builder.Register<IDynamicProcessorService, DynamicProcessorService>(Lifetime.Singleton);
             builder.Register<INetworkInitializer, NetworkInitializer>(Lifetime.Singleton);
             builder.Register<INetworkObjectSyncer, NetworkObjectsSyncer>(Lifetime.Singleton);

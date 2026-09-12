@@ -1,4 +1,4 @@
-﻿namespace Skynet.RPCSystem.DynamicProcessor
+﻿namespace Skynet.RpcSystem.DynamicProcessor
 {
     public interface IDynamicProcessorService
     {

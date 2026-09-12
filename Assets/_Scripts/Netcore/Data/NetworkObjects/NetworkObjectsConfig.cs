@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Skynet.NetworkComponents.RPCComponents;
+using Skynet.NetworkComponents.RpcComponents;
 using UnityEngine;
 
 namespace Skynet.Data.NetworkObjects

@@ -1,4 +1,4 @@
-﻿namespace Skynet.RPCSystem.ProcessorsData
+﻿namespace Skynet.RpcSystem.ProcessorsData
 {
     public enum NetProtocolType
     {

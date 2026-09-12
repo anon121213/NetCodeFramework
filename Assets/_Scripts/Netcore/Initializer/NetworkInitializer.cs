@@ -1,9 +1,9 @@
-﻿using _Scripts.Netcore.RPCSystem.Processors;
+﻿using Skynet.RpcSystem.Processors;
 using Skynet.FormatterSystem;
 using Skynet.NetworkComponents.NetworkVariableComponent.Processor;
-using Skynet.RPCSystem;
-using Skynet.RPCSystem.Callers;
-using Skynet.RPCSystem.DynamicProcessor;
+using Skynet.RpcSystem;
+using Skynet.RpcSystem.Callers;
+using Skynet.RpcSystem.DynamicProcessor;
 using Skynet.Runner;
 
 namespace Skynet.Initializer
@@ -11,12 +11,12 @@ namespace Skynet.Initializer
     public class NetworkInitializer : INetworkInitializer
     {
         private readonly INetworkFormatter _networkFormatter;
-        private readonly IRPCSendProcessor _rpcSendProcessor;
+        private readonly IRpcSendProcessor _rpcSendProcessor;
         private readonly IDynamicProcessorService _dynamicProcessorService;
         private readonly ICallerService _callerService;
 
         public NetworkInitializer(INetworkFormatter networkFormatter,
-            IRPCSendProcessor rpcSendProcessor,
+            IRpcSendProcessor rpcSendProcessor,
             IDynamicProcessorService dynamicProcessorService,
             ICallerService callerService)
         {
@@ -31,7 +31,7 @@ namespace Skynet.Initializer
             _networkFormatter.Initialize();
             _dynamicProcessorService.Initialize();
             _rpcSendProcessor.Initialize(networkRunner);
-            RPCInvoker.Initialize(_rpcSendProcessor, _callerService);
+            RpcInvoker.Initialize(_rpcSendProcessor, _callerService);
             NetworkVariableProcessor.Instance.Initialize(networkRunner);
         }
     }

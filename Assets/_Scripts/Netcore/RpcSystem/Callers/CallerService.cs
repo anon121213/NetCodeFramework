@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Skynet.NetworkComponents.RPCComponents;
+using Skynet.NetworkComponents.RpcComponents;
 
-namespace Skynet.RPCSystem.Callers
+namespace Skynet.RpcSystem.Callers
 {
     public class CallerService : ICallerService
     {
-        private ConcurrentDictionary<CallerKey, IRPCCaller> _callerServices { get; } = new();
-        private ConcurrentDictionary<CallerKey, IRPCCaller> _callerBehaviours { get; } = new();
+        private ConcurrentDictionary<CallerKey, IRpcCaller> _callerServices { get; } = new();
+        private ConcurrentDictionary<CallerKey, IRpcCaller> _callerBehaviours { get; } = new();
 
-        public IReadOnlyDictionary<CallerKey, IRPCCaller> CallerServices => _callerServices;
-        public IReadOnlyDictionary<CallerKey, IRPCCaller> CallerBehaviours => _callerBehaviours;
+        public IReadOnlyDictionary<CallerKey, IRpcCaller> CallerServices => _callerServices;
+        public IReadOnlyDictionary<CallerKey, IRpcCaller> CallerBehaviours => _callerBehaviours;
         
         public void AddCaller(Type type, NetworkService service) => 
             _callerServices[new CallerKey(type, service.InstanceId)] = service;
@@ -43,8 +43,8 @@ namespace Skynet.RPCSystem.Callers
     
     public interface ICallerService
     {
-        IReadOnlyDictionary<CallerKey, IRPCCaller> CallerServices { get; }
-        IReadOnlyDictionary<CallerKey, IRPCCaller> CallerBehaviours { get; }
+        IReadOnlyDictionary<CallerKey, IRpcCaller> CallerServices { get; }
+        IReadOnlyDictionary<CallerKey, IRpcCaller> CallerBehaviours { get; }
         
         void AddCaller(Type type, NetworkService service);
         void AddCaller(Type type, NetworkBehaviour service);

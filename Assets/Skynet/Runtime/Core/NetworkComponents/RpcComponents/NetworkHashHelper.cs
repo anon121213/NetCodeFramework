@@ -1,4 +1,4 @@
-namespace Skynet.NetworkComponents.RPCComponents
+namespace Skynet.NetworkComponents.RpcComponents
 {
     public static class NetworkHashHelper
     {

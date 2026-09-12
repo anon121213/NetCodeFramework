@@ -3,9 +3,9 @@ using System.Net.Sockets;
 using System.Reflection;
 using Skynet.Data.Attributes;
 using Skynet.NetworkComponents.NetworkVariableComponent.Data;
-using Skynet.NetworkComponents.RPCComponents;
-using Skynet.RPCSystem;
-using Skynet.RPCSystem.ProcessorsData;
+using Skynet.NetworkComponents.RpcComponents;
+using Skynet.RpcSystem;
+using Skynet.RpcSystem.ProcessorsData;
 using Skynet.Runner;
 using MessagePack;
 using UnityEngine;
@@ -35,7 +35,7 @@ namespace Skynet.NetworkComponents.NetworkVariableComponent.Processor
         public void Initialize(INetworkRunner networkRunner)
         {
             _networkRunner = networkRunner;
-            RPCInvoker.RegisterRPCInstance<NetworkVariableProcessor>(this);
+            RpcInvoker.RegisterRpcInstance<NetworkVariableProcessor>(this);
         }
 
         public void RegisterNetworkVariable<T>(string name, NetworkVariable<T> networkVariable)
@@ -73,12 +73,12 @@ namespace Skynet.NetworkComponents.NetworkVariableComponent.Processor
             };
 
             MethodInfo methodInfo = typeof(NetworkVariableProcessor).GetMethod(nameof(SyncVariableOnClients));
-            RPCInvoker.InvokeServiceRPC<NetworkVariableProcessor>(this, methodInfo, NetProtocolType.Tcp, message);
+            RpcInvoker.InvokeServiceRpc<NetworkVariableProcessor>(this, methodInfo, NetProtocolType.Tcp, message);
             
             return true;
         }
 
-        [ServerRPC]
+        [ServerRpc]
         public void SyncVariableRPC(NetworkVariableMessage message)
         {
             if (!_networkVariables.TryGetValue(message.VariableName, out var variable))
@@ -91,10 +91,10 @@ namespace Skynet.NetworkComponents.NetworkVariableComponent.Processor
             method?.Invoke(variable, new[] { deserializedValue });
 
             var clientMethod = typeof(NetworkVariableProcessor).GetMethod(nameof(SyncVariableOnClients));
-            RPCInvoker.InvokeServiceRPC<NetworkVariableProcessor>(this, clientMethod, NetProtocolType.Tcp, message);
+            RpcInvoker.InvokeServiceRpc<NetworkVariableProcessor>(this, clientMethod, NetProtocolType.Tcp, message);
         }
 
-        [ClientRPC]
+        [ClientRpc]
         public void SyncVariableOnClients(NetworkVariableMessage message)
         {
             if (!_networkVariables.TryGetValue(message.VariableName, out var variable))

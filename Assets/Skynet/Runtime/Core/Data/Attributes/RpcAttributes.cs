@@ -3,12 +3,12 @@
 namespace Skynet.Data.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class ServerRPC : Attribute
+    public class ServerRpc : Attribute
     {
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class ClientRPC : Attribute
+    public class ClientRpc : Attribute
     {
     }
 }
