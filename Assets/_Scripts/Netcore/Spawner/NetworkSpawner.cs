@@ -1,16 +1,16 @@
 ﻿using System.Reflection;
-using _Scripts.Netcore.Data.Attributes;
-using _Scripts.Netcore.Data.NetworkObjects;
-using _Scripts.Netcore.NetworkComponents.RPCComponents;
-using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.ProcessorsData;
-using _Scripts.Netcore.Runner;
-using _Scripts.Netcore.Spawner.ObjectsSyncer;
+using Skynet.Data.Attributes;
+using Skynet.Data.NetworkObjects;
+using Skynet.NetworkComponents.RPCComponents;
+using Skynet.RPCSystem;
+using Skynet.RPCSystem.ProcessorsData;
+using Skynet.Runner;
+using Skynet.Spawner.ObjectsSyncer;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-namespace _Scripts.Netcore.Spawner
+namespace Skynet.Spawner
 {
     public class NetworkSpawner : NetworkService, INetworkSpawner
     {
@@ -20,8 +20,6 @@ namespace _Scripts.Netcore.Spawner
         private readonly INetworkRunner _networkRunner;
         private readonly MethodInfo _spawnMethodInfo;
 
-        private int _uniqueId = 0;
-        
         public NetworkSpawner(IObjectResolver resolver,
             NetworkObjectsConfig networkObjectsConfig,
             INetworkObjectSyncer networkObjectSyncer,
@@ -36,22 +34,22 @@ namespace _Scripts.Netcore.Spawner
             RPCInvoker.RegisterRPCInstance<NetworkSpawner>(this);
         }
 
-        public GameObject Spawn(GameObject prefab, Transform transform = null) => 
+        public NetworkObject Spawn(NetworkObject prefab, Transform transform = null) => 
             SpawnLocal(prefab, Vector3.zero, Quaternion.identity, Vector3.one, transform);
 
-        public GameObject Spawn(GameObject prefab, Vector3 position, Transform transform = null) => 
+        public NetworkObject Spawn(NetworkObject prefab, Vector3 position, Transform transform = null) => 
             SpawnLocal(prefab, position, Quaternion.identity, Vector3.one, transform);
 
-        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform transform = null) => 
+        public NetworkObject Spawn(NetworkObject prefab, Vector3 position, Quaternion rotation, Transform transform = null) => 
             SpawnLocal(prefab, position, rotation, Vector3.one, transform);
 
-        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Vector3 scale, Transform transform = null) => 
-            SpawnLocal(prefab, position, rotation, Vector3.one, transform);
+        public NetworkObject Spawn(NetworkObject prefab, Vector3 position, Quaternion rotation, Vector3 scale, Transform transform = null) => 
+            SpawnLocal(prefab, position, rotation, scale, transform);
 
         public void Sync() => 
             _networkObjectSyncer.Sync(this);
 
-        private GameObject SpawnLocal(GameObject prefab, Vector3 position, Quaternion rotation, Vector3 scale, Transform transform)
+        private NetworkObject SpawnLocal(NetworkObject prefab, Vector3 position, Quaternion rotation, Vector3 scale, Transform transform)
         {
             if (!_networkRunner.IsServer)
                 return null;
@@ -62,32 +60,35 @@ namespace _Scripts.Netcore.Spawner
             if (!_networkObjectsConfig.TryGetNetworkObjectId(prefab, out int id))
                 return null;
 
-            GameObject go = _resolver.Instantiate(prefab, position, rotation, transform);
-            go.transform.localScale = scale;
+            NetworkObject networkObject = _resolver.Instantiate(prefab, position, rotation, transform);
+            networkObject.transform.localScale = scale;
             
-            _networkObjectSyncer.AddNetworkObject(id, _uniqueId, go);
+            int uniqueId = networkObject.GetHashCode();
+            networkObject.InitializeBehaviours(uniqueId);
+            
+            _networkObjectSyncer.AddNetworkObject(id, networkObject);
 
-            _uniqueId++;
-            
             RPCInvoker.InvokeServiceRPC<NetworkSpawner>(this, _spawnMethodInfo,
-                NetProtocolType.Tcp, id, position, rotation, scale);
+                NetProtocolType.Tcp, id, uniqueId, position, rotation, scale);
 
-            return go;
+            return networkObject;
         }
 
         [ClientRPC]
-        public void SpawnClientRpc(int gameObjectId, int uniqueId, Vector3 position, Quaternion rotation, Vector3 scale)
+        public void SpawnClientRpc(int prefabId, int uniqueId, Vector3 position, Quaternion rotation, Vector3 scale)
         {
-            if (_networkObjectSyncer.CheckSyncObject(gameObjectId, uniqueId))
+            if (_networkObjectSyncer.CheckSyncObject(prefabId, uniqueId))
                 return;
             
-            if (!_networkObjectsConfig.TryGetNetworkObject(gameObjectId, out GameObject networkObject))
+            if (!_networkObjectsConfig.TryGetNetworkObject(prefabId, out NetworkObject prefab))
                 return;
 
-            GameObject networkObj = _resolver.Instantiate(networkObject, position, rotation);
-            networkObj.transform.localScale = scale;
+            NetworkObject networkObject = _resolver.Instantiate(prefab, position, rotation);
+            networkObject.transform.localScale = scale;
             
-            _networkObjectSyncer.AddNetworkObject(gameObjectId, uniqueId, networkObj);
+            networkObject.InitializeBehaviours(uniqueId);
+            
+            _networkObjectSyncer.AddNetworkObject(prefabId, networkObject);
         }
     }
 }

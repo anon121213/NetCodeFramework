@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
+using Skynet.NetworkComponents.RPCComponents;
 using UnityEngine;
 
-namespace _Scripts.Netcore.Data.NetworkObjects
+namespace Skynet.Data.NetworkObjects
 {
-    [CreateAssetMenu(menuName = "Network/Configs/NetworkObjects", fileName = "NetworkObjectsConfig")]
+    [CreateAssetMenu(fileName = "NetworkObjectsConfig", menuName = "Skynet/NetworkObjectsConfig")]
     public class NetworkObjectsConfig : ScriptableObject
     {
-        [SerializeField] private List<GameObject> _NetworkObjects = new ();
+        [SerializeField] private List<NetworkObject> _networkObjects = new ();
 
-        public bool TryGetNetworkObject(int PrefabId, out GameObject gameObject)
+        public bool TryGetNetworkObject(int prefabId, out NetworkObject gameObject)
         {
-            if (PrefabId >= 0 && PrefabId < _NetworkObjects.Count)
+            if (prefabId >= 0 && prefabId < _networkObjects.Count)
             {
-                gameObject = _NetworkObjects[PrefabId];
+                gameObject = _networkObjects[prefabId];
                 return true;
             }
             
@@ -21,16 +22,19 @@ namespace _Scripts.Netcore.Data.NetworkObjects
             return false;
         }
 
-        public bool TryGetNetworkObjectId(GameObject prefab, out int id)
+        public bool TryGetNetworkObjectId(NetworkObject prefab, out int id)
         {
-            int index = _NetworkObjects.FindIndex(obj => obj == prefab);
+            int index = _networkObjects.FindIndex(obj => obj == prefab);
 
             id = index;
-            
+
             if (index != -1)
                 return true;
-            
-            Debug.LogError("Prefab not found in the list");
+
+            Debug.LogError($"Prefab not found. Looking for: {prefab?.name} (id={prefab?.GetInstanceID()}). List has {_networkObjects.Count} items:");
+            for (int i = 0; i < _networkObjects.Count; i++)
+                Debug.LogError($"  [{i}] {_networkObjects[i]?.name} (id={_networkObjects[i]?.GetInstanceID()})");
+
             return false;
         }
     }

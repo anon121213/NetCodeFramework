@@ -1,4 +1,4 @@
-﻿namespace _Scripts.Netcore.RPCSystem.ProcessorsData
+﻿namespace Skynet.RPCSystem.ProcessorsData
 {
     public enum ProcessorType
     {

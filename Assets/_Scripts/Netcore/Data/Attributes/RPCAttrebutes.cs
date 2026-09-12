@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace _Scripts.Netcore.Data.Attributes
+namespace Skynet.Data.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class ServerRPC : Attribute

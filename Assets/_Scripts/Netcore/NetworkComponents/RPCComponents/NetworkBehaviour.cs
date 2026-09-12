@@ -1,16 +1,20 @@
-using System.Threading;
 using UnityEngine;
 
-namespace _Scripts.Netcore.NetworkComponents.RPCComponents
+namespace Skynet.NetworkComponents.RPCComponents
 {
-    public abstract class NetworkBehaviour: MonoBehaviour, IRPCCaller, INetworkComponent
+    [RequireComponent(typeof(NetworkObject))]
+    public abstract class NetworkBehaviour : MonoBehaviour, IRPCCaller, INetworkComponent
     {
-        private static int _instanceCounter;
+        public int InstanceId { get; private set; } = -1;
 
-        public int InstanceId { get; private set; } 
-
-        public void InitializeNetworkBehaviour() => 
-            InstanceId = Interlocked.Increment(ref _instanceCounter);
+        public bool TryInitNetworkId(int hash)
+        {
+            if (InstanceId >= 0) 
+                return false;
+            
+            InstanceId = hash;
+            return true;
+        }
     }
 
     public interface INetworkComponent

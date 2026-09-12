@@ -1,7 +1,7 @@
 ﻿using System;
-using _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor;
+using Skynet.NetworkComponents.NetworkVariableComponent.Processor;
 
-namespace _Scripts.Netcore.NetworkComponents.NetworkVariableComponent
+namespace Skynet.NetworkComponents.NetworkVariableComponent
 {
     public class NetworkVariable<T> : INetworkVariableRoot<T>
     {

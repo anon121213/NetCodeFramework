@@ -1,7 +1,7 @@
 ﻿using System;
 using MessagePack;
 
-namespace _Scripts.Netcore.Data.Message
+namespace Skynet.Data.Message
 {
     [MessagePackObject]
     [Serializable]

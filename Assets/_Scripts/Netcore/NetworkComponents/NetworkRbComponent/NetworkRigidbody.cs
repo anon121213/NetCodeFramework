@@ -1,14 +1,14 @@
 ﻿using System.Reflection;
-using _Scripts.Netcore.Data.Attributes;
-using _Scripts.Netcore.NetworkComponents.NetworkTransformComponent;
-using _Scripts.Netcore.NetworkComponents.RPCComponents;
-using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.ProcessorsData;
-using _Scripts.Netcore.Runner;
+using Skynet.Data.Attributes;
+using Skynet.NetworkComponents.NetworkTransformComponent;
+using Skynet.NetworkComponents.RPCComponents;
+using Skynet.RPCSystem;
+using Skynet.RPCSystem.ProcessorsData;
+using Skynet.Runner;
 using UnityEngine;
 using VContainer;
 
-namespace _Scripts.Netcore.NetworkComponents.NetworkRbComponent
+namespace Skynet.NetworkComponents.NetworkRbComponent
 {
     [RequireComponent(typeof(Rigidbody))]
     public class NetworkRigidbody : NetworkBehaviour
@@ -39,7 +39,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkRbComponent
             _networkTransform = GetComponent<NetworkTransform>(); 
             
             _lastPosition = _rb.position;
-            _lastVelocity = _rb.velocity;
+            _lastVelocity = _rb.linearVelocity;
             _lastAngularVelocity = _rb.angularVelocity;
             
             RPCInvoker.RegisterRPCInstance<NetworkRigidbody>(this);
@@ -56,7 +56,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkRbComponent
                 _lastPosition = _rb.position;
             }
 
-            if (_rb.velocity != _lastVelocity)
+            if (_rb.linearVelocity != _lastVelocity)
                 InvokeVelocity();
             if (_rb.angularVelocity != _lastAngularVelocity)
                 InvokeAngularVelocity();
@@ -65,9 +65,9 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkRbComponent
         private void InvokeVelocity()
         {
             RPCInvoker.InvokeBehaviourRPC<NetworkRigidbody>(this, _methodInfoOnVelocityChange,
-                NetProtocolType.Udp, _rb.velocity);
+                NetProtocolType.Udp, _rb.linearVelocity);
 
-            _lastVelocity = _rb.velocity;
+            _lastVelocity = _rb.linearVelocity;
         }
 
         private void InvokeAngularVelocity()
@@ -81,7 +81,7 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkRbComponent
         [ClientRPC]
         public void OnVelocityChange(Vector3 velocity)
         {
-            _rb.velocity = velocity;
+            _rb.linearVelocity = velocity;
 
             if (_enablePrediction)
                 PredictMovement();
@@ -92,6 +92,6 @@ namespace _Scripts.Netcore.NetworkComponents.NetworkRbComponent
             _rb.angularVelocity = angularVelocity;
 
         private void PredictMovement() =>
-            _rb.position += _rb.velocity * Time.fixedDeltaTime;
+            _rb.position += _rb.linearVelocity * Time.fixedDeltaTime;
     }
 }

@@ -1,13 +1,13 @@
 ﻿using System.Reflection;
-using _Scripts.Netcore.Data.Attributes;
-using _Scripts.Netcore.NetworkComponents.RPCComponents;
-using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.ProcessorsData;
-using _Scripts.Netcore.Runner;
+using Skynet.Data.Attributes;
+using Skynet.NetworkComponents.RPCComponents;
+using Skynet.RPCSystem;
+using Skynet.RPCSystem.ProcessorsData;
+using Skynet.Runner;
 using UnityEngine;
 using VContainer;
 
-namespace _Scripts.Netcore.NetworkComponents.NetworkTransformComponent
+namespace Skynet.NetworkComponents.NetworkTransformComponent
 {
     public class NetworkTransform : NetworkBehaviour
     {

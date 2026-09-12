@@ -1,13 +1,15 @@
-﻿using _Scripts.Netcore.Data.NetworkObjects;
-using _Scripts.Netcore.FormatterSystem;
-using _Scripts.Netcore.Initializer;
-using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.Callers;
-using _Scripts.Netcore.RPCSystem.DynamicProcessor;
+﻿using _Scripts.Netcore.RPCSystem;
 using _Scripts.Netcore.RPCSystem.Processors;
-using _Scripts.Netcore.Runner;
-using _Scripts.Netcore.Spawner;
-using _Scripts.Netcore.Spawner.ObjectsSyncer;
+using Skynet.Data.NetworkObjects;
+using Skynet.FormatterSystem;
+using Skynet.Initializer;
+using Skynet.NetworkComponents.RPCComponents;
+using Skynet.RPCSystem.Callers;
+using Skynet.RPCSystem.DynamicProcessor;
+using Skynet.RPCSystem.Processors;
+using Skynet.Runner;
+using Skynet.Spawner;
+using Skynet.Spawner.ObjectsSyncer;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -17,7 +19,7 @@ namespace _Scripts.Infrastructure.Installers
     public class MainInstaller : LifetimeScope
     {
         [SerializeField] private NetworkObjectsConfig _networkObjectsConfig;
-        public GameObject GameObject;
+        [SerializeField] private NetworkObject GameObject;
         
         protected override void Configure(IContainerBuilder builder)
         {

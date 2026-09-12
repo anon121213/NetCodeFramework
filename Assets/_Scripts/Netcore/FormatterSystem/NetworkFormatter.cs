@@ -1,10 +1,10 @@
 ﻿using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
-using QuaternionFormatter = _Scripts.Netcore.FormatterSystem.Formatters.QuaternionFormatter;
-using Vector3Formatter = _Scripts.Netcore.FormatterSystem.Formatters.Vector3Formatter;
+using QuaternionFormatter = Skynet.FormatterSystem.Formatters.QuaternionFormatter;
+using Vector3Formatter = Skynet.FormatterSystem.Formatters.Vector3Formatter;
 
-namespace _Scripts.Netcore.FormatterSystem
+namespace Skynet.FormatterSystem
 {
     public class NetworkFormatter : INetworkFormatter
     {

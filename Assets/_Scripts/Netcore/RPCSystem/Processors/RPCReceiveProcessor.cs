@@ -3,14 +3,14 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using _Scripts.Netcore.Data.Message;
-using _Scripts.Netcore.NetworkComponents.RPCComponents;
-using _Scripts.Netcore.RPCSystem.Callers;
+using Skynet.Data.Message;
+using Skynet.NetworkComponents.RPCComponents;
+using Skynet.RPCSystem.Callers;
 using Cysharp.Threading.Tasks;
 using MessagePack;
 using UnityEngine;
 
-namespace _Scripts.Netcore.RPCSystem.Processors
+namespace Skynet.RPCSystem.Processors
 {
     public class RpcReceiveReceiveProcessor : IRpcReceiveProcessor
     {
@@ -65,14 +65,14 @@ namespace _Scripts.Netcore.RPCSystem.Processors
 
             if (message.CallerType == CallerTypes.Behaviour)
             {
-                if (_callerService.CallerBehaviours.TryGetValue((callerType, message.InstanceId), out IRPCCaller rpcCaller))
+                if (_callerService.CallerBehaviours.TryGetValue(new CallerKey(callerType, message.InstanceId), out IRPCCaller rpcCaller))
                     method.Invoke(rpcCaller, parameters);
                 else
                     Debug.LogError($"You try invoke method: {method.Name} in {callerType} who not register as behaviour caller" );
             }
             else
             {
-                if (_callerService.CallerServices.TryGetValue((callerType, message.InstanceId), out IRPCCaller rpcCaller))
+                if (_callerService.CallerServices.TryGetValue(new CallerKey(callerType, message.InstanceId), out IRPCCaller rpcCaller))
                     method.Invoke(rpcCaller, parameters);
                 else
                     Debug.LogError($"You try invoke method: {method.Name} in {callerType} who not register as service caller" );

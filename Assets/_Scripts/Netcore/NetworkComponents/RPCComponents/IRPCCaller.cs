@@ -1,4 +1,4 @@
-namespace _Scripts.Netcore.NetworkComponents.RPCComponents
+namespace Skynet.NetworkComponents.RPCComponents
 {
     public interface IRPCCaller
     {

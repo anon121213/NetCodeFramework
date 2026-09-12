@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Linq;
-using System.Net.Sockets;
 using System.Reflection;
-using _Scripts.Netcore.Data.Attributes;
-using _Scripts.Netcore.Data.Message;
-using _Scripts.Netcore.NetworkComponents.RPCComponents;
-using _Scripts.Netcore.RPCSystem.Callers;
-using _Scripts.Netcore.RPCSystem.DynamicProcessor;
 using _Scripts.Netcore.RPCSystem.Processors;
-using _Scripts.Netcore.RPCSystem.ProcessorsData;
+using Skynet.Data.Attributes;
+using Skynet.Data.Message;
+using Skynet.NetworkComponents.RPCComponents;
+using Skynet.RPCSystem.Callers;
+using Skynet.RPCSystem.Processors;
+using Skynet.RPCSystem.ProcessorsData;
 using MessagePack;
 using UnityEngine;
 
-namespace _Scripts.Netcore.RPCSystem
+namespace Skynet.RPCSystem
 {
-    public class RPCInvoker
+    public static class RPCInvoker
     {
         private static ICallerService _callerService;
         private static IRPCSendProcessor _sendProcessor;
@@ -26,18 +25,12 @@ namespace _Scripts.Netcore.RPCSystem
             _callerService = callerService;
         }
         
-        public static void RegisterRPCInstance<T>(NetworkService caller) where T : IRPCCaller
-        {
-            caller.InitializeNetworkService();
+        public static void RegisterRPCInstance<T>(NetworkService caller) where T : IRPCCaller => 
             _callerService.AddCaller(typeof(T), caller);
-        }
 
-        public static void RegisterRPCInstance<T>(NetworkBehaviour caller) where T : IRPCCaller
-        {
-            caller.InitializeNetworkBehaviour();
+        public static void RegisterRPCInstance<T>(NetworkBehaviour caller) where T : IRPCCaller => 
             _callerService.AddCaller(typeof(T), caller);
-        }
-        
+
         public static void InvokeBehaviourRPC<TObject>(NetworkBehaviour networkBehaviour, MethodInfo methodInfo,
             NetProtocolType protocolType, params object[] parameters) where TObject : NetworkBehaviour =>
             InvokeRPC<TObject>(networkBehaviour.InstanceId, CallerTypes.Behaviour, methodInfo, protocolType, parameters);
@@ -45,7 +38,7 @@ namespace _Scripts.Netcore.RPCSystem
         public static void InvokeServiceRPC<TObject>(NetworkService networkService, MethodInfo methodInfo,
             NetProtocolType protocolType, params object[] parameters) where TObject : NetworkService =>
             InvokeRPC<TObject>(networkService.InstanceId, CallerTypes.Service, methodInfo, protocolType, parameters);
-
+        
         private static void InvokeRPC<TObject>(int instanceID, CallerTypes callerType, MethodInfo methodInfo, NetProtocolType protocolType,
             params object[] parameters) where TObject : class
         {
@@ -56,8 +49,8 @@ namespace _Scripts.Netcore.RPCSystem
                 return;
             }
 
-            if (!_callerService.CallerServices.ContainsKey((typeof(TObject), instanceID)) &&
-                !_callerService.CallerBehaviours.ContainsKey((typeof(TObject), instanceID)))
+            if (!_callerService.CallerServices.ContainsKey(new CallerKey(typeof(TObject), instanceID)) &&
+                !_callerService.CallerBehaviours.ContainsKey(new CallerKey(typeof(TObject), instanceID)))
             {
                 Debug.LogError($"{typeof(TObject)} must be registered.");
                 return;

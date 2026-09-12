@@ -1,14 +1,20 @@
-using System.Threading;
-
-namespace _Scripts.Netcore.NetworkComponents.RPCComponents
+namespace Skynet.NetworkComponents.RPCComponents
 {
     public abstract class NetworkService : IRPCCaller
     {
-        private static int _instanceCounter;
-
         public int InstanceId { get; private set; }
 
-        public void InitializeNetworkService() => 
-            InstanceId = Interlocked.Increment(ref _instanceCounter);
+        protected NetworkService() => 
+            InstanceId = GetStableHash(GetType().FullName);
+
+        private static int GetStableHash(string str)
+        {
+            unchecked
+            {
+                int hash = (int)2166136261;
+                foreach (char c in str) { hash ^= c; hash *= 16777619; }
+                return hash;
+            }
+        }
     }
 }

@@ -1,29 +1,50 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using _Scripts.Netcore.NetworkComponents.RPCComponents;
+using Skynet.NetworkComponents.RPCComponents;
 
-namespace _Scripts.Netcore.RPCSystem.Callers
+namespace Skynet.RPCSystem.Callers
 {
     public class CallerService : ICallerService
     {
-        public Dictionary<(Type, int), IRPCCaller> CallerServices { get; } = new();
-        public Dictionary<(Type, int), IRPCCaller> CallerBehaviours { get; } = new();
+        private ConcurrentDictionary<CallerKey, IRPCCaller> _callerServices { get; } = new();
+        private ConcurrentDictionary<CallerKey, IRPCCaller> _callerBehaviours { get; } = new();
+
+        public IReadOnlyDictionary<CallerKey, IRPCCaller> CallerServices => _callerServices;
+        public IReadOnlyDictionary<CallerKey, IRPCCaller> CallerBehaviours => _callerBehaviours;
         
-        public void AddCaller(Type type, NetworkService service)
+        public void AddCaller(Type type, NetworkService service) => 
+            _callerServices[new CallerKey(type, service.InstanceId)] = service;
+
+        public void AddCaller(Type type, NetworkBehaviour service) => 
+            _callerBehaviours[new CallerKey(type, service.InstanceId)] = service;
+    }
+
+    public readonly struct CallerKey : IEquatable<CallerKey>
+    {
+        public Type Type { get; }
+        public int InstanceId { get; }
+
+        public CallerKey(Type type, int service)
         {
-            CallerServices[(type, service.InstanceId)] = service;
+            Type = type;
+            InstanceId = service;
         }
 
-        public void AddCaller(Type type, NetworkBehaviour service)
-        {
-            CallerBehaviours[(type, service.InstanceId)] = service;
-        }
+        public bool Equals(CallerKey other) => 
+            Type == other.Type && InstanceId == other.InstanceId;
+
+        public override bool Equals(object obj) => 
+            obj is CallerKey other && Equals(other);
+
+        public override int GetHashCode() => 
+            HashCode.Combine(Type, InstanceId);
     }
     
     public interface ICallerService
     {
-        Dictionary<(Type, int), IRPCCaller> CallerServices { get; }
-        Dictionary<(Type, int), IRPCCaller> CallerBehaviours { get; }
+        IReadOnlyDictionary<CallerKey, IRPCCaller> CallerServices { get; }
+        IReadOnlyDictionary<CallerKey, IRPCCaller> CallerBehaviours { get; }
         
         void AddCaller(Type type, NetworkService service);
         void AddCaller(Type type, NetworkBehaviour service);

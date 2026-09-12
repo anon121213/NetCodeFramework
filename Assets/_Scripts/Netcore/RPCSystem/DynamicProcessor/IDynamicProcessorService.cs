@@ -1,4 +1,4 @@
-﻿namespace _Scripts.Netcore.RPCSystem.DynamicProcessor
+﻿namespace Skynet.RPCSystem.DynamicProcessor
 {
     public interface IDynamicProcessorService
     {

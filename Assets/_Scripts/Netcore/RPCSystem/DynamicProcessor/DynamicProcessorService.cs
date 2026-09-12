@@ -3,10 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using _Scripts.Netcore.RPCSystem.Processors;
-using _Scripts.Netcore.RPCSystem.ProcessorsData;
+using Skynet.RPCSystem.Processors;
+using Skynet.RPCSystem.ProcessorsData;
 using Cysharp.Threading.Tasks;
 
-namespace _Scripts.Netcore.RPCSystem.DynamicProcessor
+namespace Skynet.RPCSystem.DynamicProcessor
 {
     public class DynamicProcessorService : IDynamicProcessorService, IDisposable
     {

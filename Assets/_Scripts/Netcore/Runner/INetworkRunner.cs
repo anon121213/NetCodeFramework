@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
-using _Scripts.Netcore.Data.ConnectionData;
+using Skynet.Data.ConnectionData;
 using Cysharp.Threading.Tasks;
 
-namespace _Scripts.Netcore.Runner
+namespace Skynet.Runner
 {
     public interface INetworkRunner
     {
@@ -26,5 +27,7 @@ namespace _Scripts.Netcore.Runner
         int MaxClients { get; }
 
         bool IsServer { get; }
+
+        IPAddress ServerIp { get; }
     }
 }

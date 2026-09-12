@@ -1,25 +1,26 @@
 ﻿using System.Net;
 using System.Reflection;
-using _Scripts.Netcore.Data.Attributes;
-using _Scripts.Netcore.Data.ConnectionData;
-using _Scripts.Netcore.NetworkComponents.NetworkVariableComponent;
-using _Scripts.Netcore.NetworkComponents.RPCComponents;
-using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.ProcessorsData;
-using _Scripts.Netcore.Runner;
-using _Scripts.Netcore.Spawner;
-using _Scripts.Netcore.Spawner.ObjectsSyncer;
+using System.Threading;
+using Skynet.Data.Attributes;
+using Skynet.Data.ConnectionData;
+using Skynet.NetworkComponents.NetworkVariableComponent;
+using Skynet.NetworkComponents.RPCComponents;
+using Skynet.RPCSystem;
+using Skynet.RPCSystem.ProcessorsData;
+using Skynet.Runner;
+using Skynet.Spawner;
+using Skynet.Spawner.ObjectsSyncer;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer.Unity;
 
 namespace _Scripts.Infrastructure
 {
-    public class Bootstrapper : NetworkService, IInitializable 
+    public class Bootstrapper : NetworkService, IAsyncStartable
     {
         private readonly INetworkRunner _networkRunner;
         private readonly INetworkSpawner _networkSpawner;
-        private readonly GameObject _gameObject;
+        private readonly NetworkObject _gameObject;
         private readonly INetworkObjectSyncer _networkObjectSyncer;
 
         private readonly INetworkVariable<int> _networkStringVariable = 
@@ -27,7 +28,7 @@ namespace _Scripts.Infrastructure
 
         public Bootstrapper(INetworkRunner networkRunner,
             INetworkSpawner networkSpawner,
-            GameObject gameObject,
+            NetworkObject gameObject,
             INetworkObjectSyncer networkObjectSyncer)
         {
             _networkRunner = networkRunner;
@@ -36,7 +37,7 @@ namespace _Scripts.Infrastructure
             _networkObjectSyncer = networkObjectSyncer;
         }
         
-        public async void Initialize()
+        public async Awaitable StartAsync(CancellationToken cancellation = default)
         {
             RPCInvoker.RegisterRPCInstance<Bootstrapper>(this);
             
@@ -62,7 +63,7 @@ namespace _Scripts.Infrastructure
             var go = _networkSpawner.Spawn(_gameObject, Vector3.zero, Quaternion.identity, Vector3.one);
             _networkSpawner.Spawn(_gameObject, Vector3.one * 3, Quaternion.identity, Vector3.one, go.transform);
             
-            _networkRunner.OnPlayerConnected += SendServerEvents;
+            _networkRunner.OnPlayerConnected += async id => await SendServerEvents(id);
         }
 
         private async UniTask StartClient()
@@ -82,7 +83,7 @@ namespace _Scripts.Infrastructure
             RPCInvoker.InvokeServiceRPC<Bootstrapper>(this, methodInfo, NetProtocolType.Udp, "HelloFromClient");
         }
 
-        private async void SendServerEvents(int playerId)
+        private async UniTask SendServerEvents(int playerId)
         {
             await UniTask.Delay(1000);
             

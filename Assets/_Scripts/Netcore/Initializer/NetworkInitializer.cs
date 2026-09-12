@@ -1,12 +1,12 @@
-﻿using _Scripts.Netcore.FormatterSystem;
-using _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor;
-using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.Callers;
-using _Scripts.Netcore.RPCSystem.DynamicProcessor;
-using _Scripts.Netcore.RPCSystem.Processors;
-using _Scripts.Netcore.Runner;
+﻿using _Scripts.Netcore.RPCSystem.Processors;
+using Skynet.FormatterSystem;
+using Skynet.NetworkComponents.NetworkVariableComponent.Processor;
+using Skynet.RPCSystem;
+using Skynet.RPCSystem.Callers;
+using Skynet.RPCSystem.DynamicProcessor;
+using Skynet.Runner;
 
-namespace _Scripts.Netcore.Initializer
+namespace Skynet.Initializer
 {
     public class NetworkInitializer : INetworkInitializer
     {

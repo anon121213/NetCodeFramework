@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace _Scripts.Netcore.Data.ConnectionData
+namespace Skynet.Data.ConnectionData
 {
     public struct ConnectClientData
     {

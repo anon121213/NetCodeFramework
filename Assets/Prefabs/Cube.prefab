@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1047212350166972790}
   - component: {fileID: 4357922066661504233}
   - component: {fileID: 2952733169873471855}
+  - component: {fileID: 2331837689485653908}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -60,6 +61,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -81,9 +87,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &4357922066661504233
 BoxCollider:
@@ -123,3 +131,18 @@ MonoBehaviour:
   _lerpSpeed: 1000
   _predictTime: 0.1
   _teleportThreshold: 2
+--- !u!114 &2331837689485653908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2813322995718770471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a80ccaa4739b4f778a16e4ed4dcff8da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Skynet.NetworkComponents.RPCComponents.NetworkObject
+  _networkBehaviours:
+  - {fileID: 2952733169873471855}
+  _needToCollectBehaviours: 0

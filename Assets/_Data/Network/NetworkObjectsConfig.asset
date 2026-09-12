@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38eb89f842c04bdf819d9d2137976d05, type: 3}
   m_Name: NetworkObjectsConfig
   m_EditorClassIdentifier: 
-  _NetworkObjects:
-  - {fileID: 2813322995718770471, guid: f2f97f7f3e2a49c4c9bc7a85d18e2f36, type: 3}
+  _networkObjects:
+  - {fileID: 2331837689485653908, guid: f2f97f7f3e2a49c4c9bc7a85d18e2f36, type: 3}

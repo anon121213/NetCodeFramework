@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Reflection;
-using _Scripts.Netcore.Data.Attributes;
-using _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Data;
-using _Scripts.Netcore.NetworkComponents.RPCComponents;
-using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.DynamicProcessor;
-using _Scripts.Netcore.RPCSystem.ProcessorsData;
-using _Scripts.Netcore.Runner;
+using Skynet.Data.Attributes;
+using Skynet.NetworkComponents.NetworkVariableComponent.Data;
+using Skynet.NetworkComponents.RPCComponents;
+using Skynet.RPCSystem;
+using Skynet.RPCSystem.ProcessorsData;
+using Skynet.Runner;
 using MessagePack;
 using UnityEngine;
 
-namespace _Scripts.Netcore.NetworkComponents.NetworkVariableComponent.Processor
+namespace Skynet.NetworkComponents.NetworkVariableComponent.Processor
 {
     public class NetworkVariableProcessor : NetworkService
     {

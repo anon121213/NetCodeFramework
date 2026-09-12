@@ -4,16 +4,17 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
-using _Scripts.Netcore.Data.Attributes;
-using _Scripts.Netcore.Data.ConnectionData;
-using _Scripts.Netcore.Initializer;
-using _Scripts.Netcore.NetworkComponents.RPCComponents;
 using _Scripts.Netcore.RPCSystem;
-using _Scripts.Netcore.RPCSystem.ProcessorsData;
+using Skynet.Data.Attributes;
+using Skynet.Data.ConnectionData;
+using Skynet.Initializer;
+using Skynet.NetworkComponents.RPCComponents;
+using Skynet.RPCSystem;
+using Skynet.RPCSystem.ProcessorsData;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace _Scripts.Netcore.Runner
+namespace Skynet.Runner
 {
     public class NetworkRunner : NetworkService, INetworkRunner, IDisposable
     {
@@ -56,15 +57,13 @@ namespace _Scripts.Netcore.Runner
         public async UniTask StartServer(ConnectServerData connectServerData)
         {
             SetServerParameters(connectServerData);
-            
-            ServerIp = IPAddress.Parse("127.0.0.1");
-            
+
             TcpServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             TcpServerSocket.Bind(new IPEndPoint(IPAddress.Any, TcpPort));
             TcpServerSocket.Listen(MaxClients);
 
             UdpServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            UdpServerSocket.Bind(new IPEndPoint(IPAddress.Any, 5057));
+            UdpServerSocket.Bind(new IPEndPoint(IPAddress.Any, UdpPort));
 
             IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, connectServerData.UdpPort);
 
@@ -79,13 +78,17 @@ namespace _Scripts.Netcore.Runner
 
         public async UniTask StartClient(ConnectClientData connectClientData)
         {
+            ServerIp = connectClientData.Ip;
+            UdpPort = connectClientData.UdpPort;
+            TcpPort = connectClientData.TcpPort;
+
             TcpServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             await TcpServerSocket.ConnectAsync(connectClientData.Ip.ToString(), connectClientData.TcpPort);
 
             UdpServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            UdpServerSocket.Bind(new IPEndPoint(IPAddress.Any, UdpPort));
+            UdpServerSocket.Bind(new IPEndPoint(IPAddress.Any, 0));
 
-            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, connectClientData.UdpPort);
+            IPEndPoint remoteEndPoint = new IPEndPoint(connectClientData.Ip, connectClientData.UdpPort);
 
             Debug.Log($"Клиент подключен к серверу: {TcpServerSocket.RemoteEndPoint}");
 
@@ -140,6 +143,7 @@ namespace _Scripts.Netcore.Runner
             TcpPort = data.TcpPort;
             UdpPort = data.UdpPort;
             MaxClients = data.MaxClients;
+            ServerIp = IPAddress.Any;
         }
 
         public void Dispose()
