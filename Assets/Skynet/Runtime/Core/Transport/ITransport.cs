@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Skynet.Data.ConnectionData;
@@ -37,8 +38,16 @@ namespace Skynet.Transport
         event Action<int> OnClientDisconnected;
         event Action OnConnectedToServer;
         event Action OnDisconnectedFromServer;
+        
+        IReadOnlyCollection<int> ClientIds { get; }
 
         bool IsServer { get; }
         bool IsRunning { get; }
+
+        /// <summary>
+        /// Client-side: own clientId assigned by server during handshake, valid after
+        /// <see cref="OnConnectedToServer"/> fires. Server-side: always 0.
+        /// </summary>
+        int LocalClientId { get; }
     }
 }

@@ -128,9 +128,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _enableInterpolation: 1
   _enablePrediction: 1
-  _lerpSpeed: 1000
-  _predictTime: 0.1
+  _needToCollectNetworkObject: 1
+  _positionThreshold: 0.01
+  _rotationThreshold: 0.5
+  _scaleThreshold: 0.01
   _teleportThreshold: 2
+  _delayTicks: 1
+  _keyframeIntervalTicks: 30
+  _maxExtrapolationTicks: 2
+  _networkObject: {fileID: 2331837689485653908}
 --- !u!114 &2331837689485653908
 MonoBehaviour:
   m_ObjectHideFlags: 0

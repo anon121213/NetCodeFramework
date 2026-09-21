@@ -1,48 +1,37 @@
-﻿using System.Collections.Generic;
-using System.Net.Sockets;
-using System.Reflection;
+using System.Collections.Generic;
 using Skynet.Data.Attributes;
 using Skynet.NetworkComponents.NetworkVariableComponent.Data;
 using Skynet.NetworkComponents.RpcComponents;
-using Skynet.RpcSystem;
-using Skynet.RpcSystem.ProcessorsData;
 using Skynet.Runner;
-using MessagePack;
 using UnityEngine;
 
 namespace Skynet.NetworkComponents.NetworkVariableComponent.Processor
 {
-    public class NetworkVariableProcessor : NetworkService
+    // NOTE (Chunk 4c-4): the NetworkVariable subsystem is on ice until the source generator
+    // lands in Chunk 4d and gives us a real RPC pipeline for these messages. The class stays
+    // so NetworkVariable<T> compiles; TrySyncVariable is a no-op that just updates the local
+    // dictionary. Do NOT register this in the DI container yet.
+    public partial class NetworkVariableProcessor : NetworkService
     {
         private readonly Dictionary<string, object> _networkVariables = new();
-        
+
         private INetworkRunner _networkRunner;
 
         private static NetworkVariableProcessor _instance;
 
-        public static NetworkVariableProcessor Instance
-        {
-            get
-            {
-                if (_instance != null)
-                    return _instance;
-
-                _instance = new NetworkVariableProcessor();
-                return _instance;
-            }
-        }
+        public static NetworkVariableProcessor Instance => _instance ??= new NetworkVariableProcessor();
 
         public void Initialize(INetworkRunner networkRunner)
         {
             _networkRunner = networkRunner;
-            RpcInvoker.RegisterRpcInstance<NetworkVariableProcessor>(this);
+            // TODO(Chunk 4d): register RPC handlers via source generator.
         }
 
         public void RegisterNetworkVariable<T>(string name, NetworkVariable<T> networkVariable)
         {
             if (_networkVariables.TryAdd(name, networkVariable))
                 return;
-            
+
             Debug.LogWarning($"Variable {name} is already registered.");
         }
 
@@ -66,45 +55,20 @@ namespace Skynet.NetworkComponents.NetworkVariableComponent.Processor
                 if (variable is INetworkVariableRoot<T> networkVariable)
                     networkVariable.ValueRoot = newValue;
 
-            var message = new NetworkVariableMessage
-            {
-                VariableName = name,
-                SerializedValue = MessagePackSerializer.Serialize(newValue)
-            };
-
-            MethodInfo methodInfo = typeof(NetworkVariableProcessor).GetMethod(nameof(SyncVariableOnClients));
-            RpcInvoker.InvokeServiceRpc<NetworkVariableProcessor>(this, methodInfo, NetProtocolType.Tcp, message);
-            
+            // TODO(Chunk 4d): broadcast NetworkVariableMessage to clients via generated sender.
             return true;
         }
 
         [ServerRpc]
         public void SyncVariableRPC(NetworkVariableMessage message)
         {
-            if (!_networkVariables.TryGetValue(message.VariableName, out var variable))
-                return;
-
-            var variableType = variable.GetType().GetGenericArguments()[0];
-            var deserializedValue = MessagePackSerializer.Deserialize(variableType, message.SerializedValue);
-            var method = variable.GetType().GetProperty(nameof(INetworkVariableRoot<object>.ValueRoot))?.SetMethod;
-
-            method?.Invoke(variable, new[] { deserializedValue });
-
-            var clientMethod = typeof(NetworkVariableProcessor).GetMethod(nameof(SyncVariableOnClients));
-            RpcInvoker.InvokeServiceRpc<NetworkVariableProcessor>(this, clientMethod, NetProtocolType.Tcp, message);
+            // TODO(Chunk 4d): reintroduce sync via generated dispatcher.
         }
 
         [ClientRpc]
         public void SyncVariableOnClients(NetworkVariableMessage message)
         {
-            if (!_networkVariables.TryGetValue(message.VariableName, out var variable))
-                return;
-            
-            var variableType = variable.GetType().GetGenericArguments()[0];
-            var deserializedValue = MessagePackSerializer.Deserialize(variableType, message.SerializedValue);
-            
-            var property = variable.GetType().GetProperty(nameof(INetworkVariableRoot<object>.ValueRoot));
-            property?.SetValue(variable, deserializedValue);
+            // TODO(Chunk 4d): reintroduce sync via generated dispatcher.
         }
     }
 }

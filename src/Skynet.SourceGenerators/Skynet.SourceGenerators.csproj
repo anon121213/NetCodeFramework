@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Roslyn analyzers/generators must target netstandard2.0 -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Skynet.SourceGenerators</RootNamespace>
+    <AssemblyName>Skynet.SourceGenerators</AssemblyName>
+
+    <!-- Marks this project as a Roslyn component (analyzer / source generator) -->
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+
+    <!-- Don't ship any implicit references — Roslyn hosts strip everything except our own DLL. -->
+    <IncludeBuildOutput>true</IncludeBuildOutput>
+
+    <!-- Override Directory.Build.props (parent) — this project doesn't have generators of its own
+         to emit, and the parent's path expression breaks csc if nothing runs. -->
+    <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core Roslyn packages. PrivateAssets=all so they don't propagate to consumers. -->
+    <!-- Unity 6000.x bundles Roslyn ~4.3. Analyzers built against a NEWER Roslyn silently
+         fail to load. Keep this ≤ Unity's version. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

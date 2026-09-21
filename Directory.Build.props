@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <!--
+      Write every source generator's output to disk under obj/generated/{Assembly}/... so we can
+      always inspect the raw .g.cs — regardless of whether Rider's Analyzers tree shows them.
+      Applies to every .csproj under this folder (Unity-generated ones included).
+    -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)generated\$(AssemblyName)</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+</Project>

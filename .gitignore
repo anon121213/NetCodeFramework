@@ -41,6 +41,9 @@ ExportedObj/
 /src/**/bin/
 /src/**/obj/
 
+# Source-generator emitted files (see Directory.Build.props — kept on disk for inspection only)
+/generated/
+
 # Debug/symbol files
 *.pidb
 *.booproj

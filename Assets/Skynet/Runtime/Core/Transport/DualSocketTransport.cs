@@ -32,6 +32,7 @@ namespace Skynet.Transport
 
         private readonly ConcurrentDictionary<int, ClientConnection> _clients = new();
         private readonly ConcurrentDictionary<IPEndPoint, int> _endPointToClients = new();
+        private readonly List<int> _clientsIds = new();
 
         private int _nextClientId;
 
@@ -56,9 +57,12 @@ namespace Skynet.Transport
 
         #endregion
 
+        public IReadOnlyCollection<int> ClientIds => _clientsIds;
         public bool IsServer { get; private set; }
 
         public bool IsRunning => _isRunning;
+
+        public int LocalClientId => _myClientId;
 
         public event DataReceivedHandler OnDataReceived;
         public event Action<int> OnClientConnected;
@@ -147,6 +151,14 @@ namespace Skynet.Transport
             _tcpSendTask = Task.Run(() => ClientTcpSendLoop(_cts.Token));
             _clientUdpReceiveTask = Task.Run(() => ClientUdpReceiveLoop(_cts.Token));
             _udpSendTask = Task.Run(() => ClientUdpSendLoop(_cts.Token));
+            
+            // UDP handshake — server needs at least one packet from us to discover our UDP endpoint.
+            // Payload is empty; header carries our clientId so the receive loop can register the mapping.
+            var handshake = ArrayPool<byte>.Shared.Rent(HeaderSize);
+            BinaryPrimitives.WriteInt32LittleEndian(handshake, _myClientId);
+            await _udp.SendToAsync(new ArraySegment<byte>(handshake, 0, HeaderSize),
+                SocketFlags.None, _serverEndPoint);
+            ArrayPool<byte>.Shared.Return(handshake);
 
             OnConnectedToServer?.Invoke();
         }
@@ -182,7 +194,11 @@ namespace Skynet.Transport
 
             try
             {
-                await Task.WhenAny(Task.WhenAll(tasks), Task.Delay(TimeSpan.FromSeconds(2)));
+                // ConfigureAwait(false) is critical here: Dispose() may block the Unity main thread
+                // via GetAwaiter().GetResult(). If this await captured the UnityMainThreadContext,
+                // its continuation would try to run on the blocked main thread — instant deadlock.
+                await Task.WhenAny(Task.WhenAll(tasks), Task.Delay(TimeSpan.FromSeconds(2)))
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -190,11 +206,18 @@ namespace Skynet.Transport
             }
 
             _clients.Clear();
+            _clientsIds.Clear();
             _endPointToClients.Clear();
             _cts.Dispose();
         }
 
-        public void Dispose() => StopAsync().GetAwaiter().GetResult();
+        public void Dispose()
+        {
+            // Run StopAsync on a thread-pool worker so that if we're being disposed from Unity's
+            // main thread (VContainer scope teardown on playmode exit), the internal awaits don't
+            // try to resume back onto the blocked main thread.
+            Task.Run(() => StopAsync()).GetAwaiter().GetResult();
+        }
 
         // ---------- Send API ----------
 
@@ -256,6 +279,7 @@ namespace Skynet.Transport
                     try
                     {
                         clientSocket = await _tcpListener.AcceptAsync();
+                        clientSocket.NoDelay = true;
                     }
                     catch (ObjectDisposedException) { break; }
                     catch (SocketException) when (ct.IsCancellationRequested) { break; }
@@ -270,6 +294,7 @@ namespace Skynet.Transport
                         Cts = CancellationTokenSource.CreateLinkedTokenSource(ct),
                     };
                     _clients[clientId] = conn;
+                    _clientsIds.Add(clientId);
 
                     var handshake = new byte[HeaderSize + HeaderSize];
                     BinaryPrimitives.WriteInt32LittleEndian(handshake.AsSpan(0, HeaderSize), HeaderSize);
@@ -438,11 +463,11 @@ namespace Skynet.Transport
                             _endPointToClients.TryRemove(conn.UdpEndPoint, out _);
                         conn.UdpEndPoint = senderEp;
                         _endPointToClients[senderEp] = clientId;
-                        // Unblocks ServerUdpSendLoop on first endpoint discovery; TrySetResult is
-                        // idempotent, so later NAT-rebinding updates are a no-op here.
                         conn.UdpReady.TrySetResult(true);
                     }
 
+                    if (result.ReceivedBytes == HeaderSize) continue;
+                    
                     OnDataReceived?.Invoke(
                         clientId,
                         buffer.AsSpan(HeaderSize, result.ReceivedBytes - HeaderSize),
@@ -598,6 +623,8 @@ namespace Skynet.Transport
         {
             if (!_clients.TryRemove(conn.ClientId, out _)) return;
 
+            _clientsIds.Remove(conn.ClientId);
+            
             if (conn.UdpEndPoint != null)
                 _endPointToClients.TryRemove(conn.UdpEndPoint, out _);
 
