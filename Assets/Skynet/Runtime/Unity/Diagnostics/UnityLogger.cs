@@ -9,8 +9,9 @@ namespace Skynet.Unity.Diagnostics
         public void Info(string message) => Debug.Log(message);
         public void Warn(string message) => Debug.LogWarning(message);
         public void Error(string message) => Debug.LogError(message);
+        public void Exception(Exception message) => Debug.LogException(message);
 
-        public void Error(string message, Exception exception)
+        public void Exception(string message, Exception exception)
         {
             Debug.LogError(message);
             Debug.LogException(exception);

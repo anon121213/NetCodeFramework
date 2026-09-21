@@ -1,10 +1,9 @@
-using Skynet.Data.NetworkObjects;
+using Skynet.Configuration;
 using Skynet.Diagnostics;
-using Skynet.NetworkComponents.RpcComponents;
+using Skynet.NetworkComponents;
 using Skynet.Runner;
 using Skynet.RpcSystem;
 using Skynet.Spawner;
-using Skynet.Spawner.ObjectsSyncer;
 using Skynet.Threading;
 using Skynet.Tick;
 using Skynet.Transport;
@@ -35,8 +34,7 @@ namespace _Scripts.Infrastructure.Installers
             // Force eager resolution so the scheduler installs its PlayerLoop hook at scope startup
             // (and its Dispose runs at scope shutdown to remove the hook).
             builder.RegisterInstance(new NetworkTickSettings(tickRate: 30));
-            builder.Register<PlayerLoopNetworkTickScheduler>(Lifetime.Singleton)
-                .As<INetworkTickScheduler>();
+            builder.Register<PlayerLoopNetworkTickScheduler>(Lifetime.Singleton).As<INetworkTickScheduler>();
             builder.RegisterBuildCallback(container => container.Resolve<INetworkTickScheduler>());
 
             // Formatters (kept in old location for now — will move to Skynet.Unity slot in Stage 6).
@@ -45,16 +43,15 @@ namespace _Scripts.Infrastructure.Installers
             builder.Register<INetworkFormatter, NetworkFormatter>(Lifetime.Singleton);
             builder.RegisterBuildCallback(container => container.Resolve<INetworkFormatter>().Initialize());
 
-            // Skynet.Core RPC + Transport pipeline
+            // Skynet.Core RPC + Transport pipeline. Note: NetworkRunner creates ClockSyncService internally,
+            // no separate registration needed.
             builder.Register<ITransport, DualSocketTransport>(Lifetime.Singleton);
             builder.Register<IRpcHandlerRegistry, RpcHandlerRegistry>(Lifetime.Singleton);
             builder.Register<IRpcSender, RpcSender>(Lifetime.Singleton);
             builder.Register<IRpcDispatcher, RpcDispatcher>(Lifetime.Singleton);
-            builder.Register<INetworkRunner, NetworkRunner>(Lifetime.Singleton);
-            builder.Register<ClockSyncService>(Lifetime.Singleton).As<IServerClockSync>();
-            builder.RegisterBuildCallback(c => c.Resolve<IServerClockSync>());  // eager
-            
-            // Spawner + object syncer — kept, but their RpcInvoker calls are commented until source-gen lands.
+            builder.Register<NetworkRunner>(Lifetime.Singleton);
+
+            // Spawner + object container
             builder.Register<INetworkObjectContainer, NetworkObjectsContainer>(Lifetime.Singleton);
             builder.Register<INetworkSpawner, NetworkSpawner>(Lifetime.Singleton).WithParameter(_networkObjectsConfig);
 

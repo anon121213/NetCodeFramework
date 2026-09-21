@@ -2,7 +2,7 @@ using System.Net;
 using System.Threading;
 using Skynet.Data.Attributes;
 using Skynet.Data.ConnectionData;
-using Skynet.NetworkComponents.RpcComponents;
+using Skynet.NetworkComponents;
 using Skynet.Runner;
 using Skynet.Spawner;
 using Cysharp.Threading.Tasks;
@@ -15,31 +15,27 @@ namespace _Scripts.Infrastructure
 {
     public partial class Bootstrapper : NetworkService, IAsyncStartable
     {
-        private readonly INetworkRunner _networkRunner;
         private readonly INetworkSpawner _networkSpawner;
         private readonly NetworkObject _gameObject;
 
-        public Bootstrapper(INetworkRunner networkRunner,
+        [SyncVar(Authority.Server, NetProtocolType.Udp)] private int Health = 100;
+
+        public Bootstrapper(NetworkRunner runner,
             INetworkSpawner networkSpawner,
-            NetworkObject gameObject,
-            IRpcHandlerRegistry registry,
-            IRpcSender sender)
+            NetworkObject gameObject) : base(runner)
         {
-            _networkRunner = networkRunner;
             _networkSpawner = networkSpawner;
             _gameObject = gameObject;
-
-            InitializeRpc(registry, sender);
         }
 
         public async Awaitable StartAsync(CancellationToken cancellation = default)
         {
-            
 #if SERVER
             await StartServer();
 #else
             await StartClient();
 #endif
+            OnHealthChanged += OnChanged;
         }
 
         private async UniTask StartServer()
@@ -51,11 +47,16 @@ namespace _Scripts.Infrastructure
                 UdpPort = 5057,
             };
 
-            _networkRunner.OnServerStarted += () => Debug.Log("Server started");
-            _networkRunner.OnPlayerConnected += id => SendToClient(id, $"Hello from server (for client {id})");
-            _networkRunner.OnPlayerDisconnected += id => Debug.Log($"Player disconnected: {id}");
+            Runner.OnServerStarted += () => Debug.Log("Server started");
+            Runner.OnPlayerConnected += id =>
+            {
+                SendToClient(id, $"Hello from server (for client {id})");
+                _networkSpawner.Spawn(_gameObject, Vector3.zero, Quaternion.identity, Vector3.one, ownerClientId: id);
+                Health += 10;
+            };
+            Runner.OnPlayerDisconnected += id => Debug.Log($"Player disconnected: {id}");
 
-            await _networkRunner.StartServerAsync(serverData);
+            await Runner.StartServerAsync(serverData);
             
             var go = _networkSpawner.Spawn(_gameObject, Vector3.zero, Quaternion.identity, Vector3.one);
             _networkSpawner.Spawn(_gameObject, Vector3.one * 3, Quaternion.identity, Vector3.one, go.transform);
@@ -72,18 +73,30 @@ namespace _Scripts.Infrastructure
                 UdpPort = 5057,
             };
 
-            _networkRunner.OnConnectedToServer += () => Debug.Log($"Connected to server, my id = {_networkRunner.LocalPlayerId}");
-            _networkRunner.OnDisconnectedFromServer += () => Debug.Log("Disconnected from server");
+            Runner.OnConnectedToServer += () => Debug.Log($"Connected to server, my id = {Runner.LocalPlayerId}");
+            Runner.OnDisconnectedFromServer += () => Debug.Log("Disconnected from server");
 
-            await _networkRunner.StartClientAsync(clientData);
+            await Runner.StartClientAsync(clientData);
             
             SendToServer("Hello from client");
         }
+
+        private void OnChanged(int oldValue, int newValue) => 
+            Debug.LogError($"oldValue: {oldValue}, newValue: {newValue}");
+
+        [OnChange(nameof(Health))]
+        private void OnHealthChange(int oldValue, int newValue) => 
+            Debug.LogError($"oldValue: {oldValue}, newValue: {newValue}");
 
         [ClientRpc(NetProtocolType.Tcp, RpcTarget.Client)]
         private void HandleSendToClient(string text) => Debug.Log(text);
 
         [ServerRpc]
         private void HandleSendToServer(string text) => Debug.Log(text);
+
+        protected override void OnDispose()
+        {
+            OnHealthChanged -= OnChanged;
+        }
     }
 }

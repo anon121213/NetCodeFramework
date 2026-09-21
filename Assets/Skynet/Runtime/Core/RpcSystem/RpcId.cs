@@ -8,12 +8,12 @@ namespace Skynet.RpcSystem
     /// This is the same algorithm the source generator uses to emit compile-time constants.
     /// Runtime callers rarely need to invoke it — IDs generally live as generated <c>const int</c>s.
     /// </summary>
-    public static class RpcId
+    internal static class RpcId
     {
         // FNV-1a 32-bit — cheap, well-distributed for short strings, and (crucially) deterministic
         // across .NET runtimes/versions/platforms (unlike string.GetHashCode which was randomised
         // in .NET Core 3.1+).
-        public static int Fnv1a(string s)
+        internal static int Fnv1a(string s)
         {
             if (s == null) return 0;
             unchecked

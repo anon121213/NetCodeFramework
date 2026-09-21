@@ -1,6 +1,6 @@
 namespace Skynet.Tick
 {
-    public interface IServerClockSync
+    internal interface IServerClockSync
     {
         bool IsSynced { get; }
         long TickOffset { get; }

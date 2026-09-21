@@ -318,7 +318,7 @@ namespace Skynet.Transport
                 }
             }
             catch (OperationCanceledException) { }
-            catch (Exception ex) { _logger.Error("Accept loop crashed", ex); }
+            catch (Exception ex) { _logger.Exception("Accept loop crashed", ex); }
         }
 
         private async Task ServerTcpReceiveLoop(ClientConnection conn)
@@ -355,7 +355,7 @@ namespace Skynet.Transport
             catch (SocketException ex) when (ex.SocketErrorCode is SocketError.ConnectionReset or SocketError.ConnectionAborted) { }
             catch (Exception ex)
             {
-                _logger.Error($"Server TCP receive loop for client {conn.ClientId} crashed", ex);
+                _logger.Exception($"Server TCP receive loop for client {conn.ClientId} crashed", ex);
             }
 
             DisconnectClient(conn);
@@ -475,7 +475,7 @@ namespace Skynet.Transport
                 }
             }
             catch (OperationCanceledException) { }
-            catch (Exception ex) { _logger.Error("Server UDP receive loop crashed", ex); }
+            catch (Exception ex) { _logger.Exception("Server UDP receive loop crashed", ex); }
             finally { ArrayPool<byte>.Shared.Return(buffer); }
         }
 
@@ -517,7 +517,7 @@ namespace Skynet.Transport
             }
             catch (Exception ex)
             {
-                _logger.Error("TCP receive loop crashed", ex);
+                _logger.Exception("TCP receive loop crashed", ex);
             }
 
             OnDisconnectedFromServer?.Invoke();
@@ -586,7 +586,7 @@ namespace Skynet.Transport
                 }
             }
             catch (OperationCanceledException) { }
-            catch (Exception ex) { _logger.Error("Client UDP receive loop crashed", ex); }
+            catch (Exception ex) { _logger.Exception("Client UDP receive loop crashed", ex); }
             finally { ArrayPool<byte>.Shared.Return(buffer); }
         }
 

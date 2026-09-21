@@ -45,7 +45,7 @@ namespace Skynet.RpcSystem
             }
             catch (Exception e)
             {
-                _logger.Error($"Handler {message.CallerTypeId}:{message.InstanceId}:{message.MethodId} threw", e);
+                _logger.Exception($"Handler {message.CallerTypeId}:{message.InstanceId}:{message.MethodId} threw", e);
             }
         }
     }

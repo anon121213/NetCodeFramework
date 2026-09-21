@@ -3,8 +3,7 @@
     "rootNamespace": "Skynet.Unity",
     "references": [
         "Skynet.Core",
-        "UniTask",
-        "VContainer"
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
